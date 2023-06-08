@@ -17,8 +17,8 @@ msgstr "Latex to JATS XML Converter Plugin"
 msgid "plugins.generic.latexConverter.description"
 msgstr "Transforms journal articles from Latex to JATS XML format."
 
-msgid "plugins.generic.latexConverter.button.parseLatex"
-msgstr "Convert to JATS XML"
+msgid "plugins.generic.latexConverter.button.extractZip"
+msgstr "Extract Zip file"
 
-msgid "grid.action.parse"
-msgstr "Convert this file to JATS XML"
+msgid "plugins.generic.latexConverter.button.convertToPdf"
+msgstr "Convert to Pdf"
