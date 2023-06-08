@@ -7,6 +7,7 @@ namespace Composer\Autoload;
 class ComposerStaticInit0696d5303e0b54e4c8ddebe750ffb5ad
 {
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'TIBHannover\\LatexConverter\\Components\\Forms\\SettingsForm' => __DIR__ . '/../..' . '/classes/Components/Forms/SettingsForm.inc.php',
         'TIBHannover\\LatexConverter\\Handler\\LatexConverterHandler' => __DIR__ . '/../..' . '/classes/Handler/LatexConverterHandler.inc.php',
     );
