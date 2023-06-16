@@ -12,13 +12,31 @@ msgstr ""
 "Language: \n"
 
 msgid "plugins.generic.latexConverter.displayName"
-msgstr "Latex to JATS XML Converter Plugin"
+msgstr "LaTex to PDF Converter Plugin"
 
 msgid "plugins.generic.latexConverter.description"
-msgstr "Transforms journal articles from Latex to JATS XML format."
+msgstr "Transforms journal articles from LaTex to PDF format."
 
-msgid "plugins.generic.latexConverter.button.parseLatex"
-msgstr "Convert to JATS XML"
+msgid "plugins.generic.latexConverter.button.extract"
+msgstr "Extract LaTex from Zip"
 
-msgid "grid.action.parse"
-msgstr "Convert this file to JATS XML"
+msgid "plugins.generic.latexConverter.button.convert"
+msgstr "Convert LaTex to Pdf"
+
+msgid "plugins.generic.latexConverter.notification.defaultErrorOccurred"
+msgstr "Errors occurred while processing request. Please try again or contact your administrator."
+
+msgid "plugins.generic.latexConverter.notification.errorOpeningFile"
+msgstr "Couldn't open file, the file might be corrupt. Please upload file again."
+
+msgid "plugins.generic.latexConverter.notification.noValidZipFile"
+msgstr "This file is not a valid ZIP file"
+
+msgid "plugins.generic.latexConverter.notification.noTexFileFound"
+msgstr "No LaTex file found in ZIP file. Please make sure you include a Tex file."
+
+msgid "plugins.generic.latexConverter.notification.multipleTexFilesFound"
+msgstr "Multiple Tex files found in ZIP file. Please make sure you include a \"{$value}\" file in the archive."
+
+msgid "plugins.generic.latexConverter.notification.extracted"
+msgstr "File extraction successful"

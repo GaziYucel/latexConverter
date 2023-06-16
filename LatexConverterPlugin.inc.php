@@ -14,12 +14,21 @@
 
 const LATEX_CONVERTER_IS_PRODUCTION_KEY = 'LatexConverter_IsProductionEnvironment';
 const LATEX_CONVERTER_PLUGIN_PATH = __DIR__;
+const LATEX_CONVERTER_ZIP_FILE_TYPE = 'application/zip';
+const LATEX_CONVERTER_LATEX_FILE_TYPE = 'text/x-tex';
+const LATEX_CONVERTER_TEX_EXTENSION = 'tex';
+const LATEX_CONVERTER_MAIN_FILENAME = 'main.' . LATEX_CONVERTER_TEX_EXTENSION;
+const LATEX_CONVERTER_TEX_EXTENSIONS = [LATEX_CONVERTER_TEX_EXTENSION];
+const LATEX_CONVERTER_IMAGE_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png', 'jpe'];
+const LATEX_CONVERTER_HTML_EXTENSIONS = ['htm', 'html'];
+const LATEX_CONVERTER_STYLE_EXTENSIONS = ['css'];
+const LATEX_CONVERTER_AUTHORIZED_ROLES = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
 
 require_once(LATEX_CONVERTER_PLUGIN_PATH . '/vendor/autoload.php');
 
-use TIBHannover\LatexConverter\Components\Forms\SettingsForm;
-
 import('lib.pkp.classes.plugins.GenericPlugin');
+
+use TIBHannover\LatexConverter\Components\Forms\SettingsForm;
 
 class LatexConverterPlugin extends GenericPlugin
 {
@@ -28,15 +37,19 @@ class LatexConverterPlugin extends GenericPlugin
      */
     function register($category, $path, $mainContextId = null): bool
     {
+        define("LATEX_CONVERTER_PLUGIN_NAME", $this->getName());
+
         if (parent::register($category, $path, $mainContextId)) {
             if ($this->getEnabled()) {
-                // Register callbacks.
-                HookRegistry::register('TemplateManager::fetch', array($this, 'templateFetchCallback'));
-                HookRegistry::register('LoadHandler', array($this, 'callbackLoadHandler'));
+                HookRegistry::register('TemplateManager::fetch', [$this, 'templateFetchCallback']);
+                HookRegistry::register('LoadHandler', [$this, 'callbackLoadHandler']);
+
                 $this->_registerTemplateResource();
             }
+
             return true;
         }
+
         return false;
     }
 
@@ -48,17 +61,96 @@ class LatexConverterPlugin extends GenericPlugin
      */
     public function templateFetchCallback(string $hookName, array $args): void
     {
+        $request = $this->getRequest();
+        $dispatcher = $request->getDispatcher();
 
+        $templateMgr = $args[0];
+        $resourceName = $args[1];
+        if ($resourceName == 'controllers/grid/gridRow.tpl') {
+            $row = $templateMgr->getTemplateVars('row');
+            $data = $row->getData();
+            if (is_array($data) && (isset($data['submissionFile']))) {
+                $submissionFile = $data['submissionFile'];
+                $fileExtension = strtolower($submissionFile->getData('mimetype'));
+
+                $stageId = (int)$request->getUserVar('stageId');
+                $submissionId = $submissionFile->getData('submissionId');
+                $submission = Services::get('submission')->get($submissionId);
+                $submissionStageId = $submission->getData('stageId');
+                $roles = $request->getUser()->getRoles($request->getContext()->getId());
+
+                $isAuthorized = false;
+                foreach ($roles as $role) {
+                    if (in_array($role->getId(), LATEX_CONVERTER_AUTHORIZED_ROLES)) {
+                        $isAuthorized = true;
+                        break;
+                    }
+                }
+
+                // ensure that the conversion is run on the appropriate workflow stage
+                if ($isAuthorized && $stageId == WORKFLOW_STAGE_ID_PRODUCTION &&
+                    $submissionStageId == WORKFLOW_STAGE_ID_PRODUCTION
+                ) {
+                    $actionArgs = array(
+                        'submissionId' => $submissionId,
+                        'submissionFileId' => $submissionFile->getId(),
+                        'stageId' => $stageId,
+                        'archiveType' => LATEX_CONVERTER_ZIP_FILE_TYPE);
+
+                    $pathRedirect = $dispatcher->url($request, ROUTE_PAGE, null,
+                        'workflow', 'access', $submissionId);
+
+                    // only show link if file is zip
+                    if (strtolower($fileExtension) == LATEX_CONVERTER_ZIP_FILE_TYPE) {
+                        $path = $dispatcher->url($request, ROUTE_PAGE, null,
+                            'latexConverter', 'extract', null, $actionArgs);
+
+                        import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
+
+                        $row->addAction(new LinkAction(
+                            'latexconverter_extract_zip',
+                            new PostAndRedirectAction($path, $pathRedirect),
+                            __('plugins.generic.latexConverter.button.extract')
+                        ));
+                    } // only show link if file is tex
+                    elseif (strtolower($fileExtension) == LATEX_CONVERTER_LATEX_FILE_TYPE) {
+
+                        $path = $dispatcher->url($request, ROUTE_PAGE, null,
+                            'latexConverter', 'convert', null, $actionArgs);
+
+                        import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
+
+                        $row->addAction(new LinkAction(
+                            'latexconverter_convert_to_pdf',
+                            new PostAndRedirectAction($path, $pathRedirect),
+                            __('plugins.generic.latexConverter.button.convert')
+                        ));
+                    }
+                }
+            }
+        }
     }
 
     /**
-     * Execute LatexConverterHandler
+     * Execute PluginHandler
      * @param $hookName
      * @param $args
      * @return bool
      */
     public function callbackLoadHandler($hookName, $args): bool
     {
+        $page = $args[0];
+        $op = $args[1];
+
+        switch ("$page/$op") {
+            case "latexConverter/extract":
+            case "latexConverter/convert":
+                define('HANDLER_CLASS', 'TIBHannover\LatexConverter\Handler\PluginHandler');
+                return true;
+            default:
+                break;
+        }
+
         return false;
     }
 
@@ -111,6 +203,9 @@ class LatexConverterPlugin extends GenericPlugin
                     $form->execute();
                     return new \JSONMessage(true);
                 }
+                break;
+            default:
+                break;
         }
         return parent::manage($args, $request);
     }

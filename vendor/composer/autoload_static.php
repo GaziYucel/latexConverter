@@ -7,8 +7,11 @@ namespace Composer\Autoload;
 class ComposerStaticInit0696d5303e0b54e4c8ddebe750ffb5ad
 {
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'TIBHannover\\LatexConverter\\Action\\Convert' => __DIR__ . '/../..' . '/classes/Action/Convert.inc.php',
+        'TIBHannover\\LatexConverter\\Action\\Extract' => __DIR__ . '/../..' . '/classes/Action/Extract.inc.php',
         'TIBHannover\\LatexConverter\\Components\\Forms\\SettingsForm' => __DIR__ . '/../..' . '/classes/Components/Forms/SettingsForm.inc.php',
-        'TIBHannover\\LatexConverter\\Handler\\LatexConverterHandler' => __DIR__ . '/../..' . '/classes/Handler/LatexConverterHandler.inc.php',
+        'TIBHannover\\LatexConverter\\Handler\\PluginHandler' => __DIR__ . '/../..' . '/classes/Handler/PluginHandler.inc.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
