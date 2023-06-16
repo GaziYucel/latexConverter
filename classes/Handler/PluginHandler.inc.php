@@ -20,36 +20,34 @@ use Handler;
 use JSONMessage;
 use PluginRegistry;
 use WorkflowStageAccessPolicy;
+use TIBHannover\LatexConverter\Action\Convert;
+use TIBHannover\LatexConverter\Action\Extract;
 
-class LatexConverterHandler extends Handler
+class PluginHandler extends Handler
 {
-    /**
-     *
-     * @var object LatexConverterPlugin
-     */
     protected object $plugin;
 
     /**
      * List of methods allowed
      * @var array|string[]
      */
-    protected array $allowedMethods = ['extractZip', 'convertToPdf'];
+    protected array $allowedMethods = ['extract', 'convert'];
 
     function __construct()
     {
         parent::__construct();
-        $this->plugin = PluginRegistry::getPlugin('generic', LATEX_CONVERTER_PLUGIN_NAME);
 
+        $this->plugin = PluginRegistry::getPlugin('generic', LATEX_CONVERTER_PLUGIN_NAME);
         $this->addRoleAssignment(LATEX_CONVERTER_AUTHORIZED_ROLES, $this->allowedMethods);
     }
 
     /**
+     * Overridden method from Handler
      * @copydoc PKPHandler::authorize()
      */
     function authorize($request, &$args, $roleAssignments): bool
     {
         import('lib.pkp.classes.security.authorization.WorkflowStageAccessPolicy');
-
         $this->addPolicy(new WorkflowStageAccessPolicy($request, $args, $roleAssignments,
             'submissionId', (int)$request->getUserVar('stageId')));
 
@@ -57,32 +55,26 @@ class LatexConverterHandler extends Handler
     }
 
     /**
-     * Extracts zip file and adds to files list
-     * @param $args
+     * Extracts file and adds to files list
+     * @param $params
      * @param $request
      * @return JSONMessage
      */
-    public function extractZip($args, $request): JSONMessage
+    public function extract($params, $request): JSONMessage
     {
-        error_log("LatexConverterHandler > extractZip");
-
-        return new JSONMessage(true, array(
-            'submissionId' => '51'
-        ));
+        $action = new Extract($this->plugin, $request, $params);
+        return $action->execute();
     }
 
     /**
      * Converts LaTex file to pdf
-     * @param $args
+     * @param $params
      * @param $request
      * @return JSONMessage
      */
-    public function convertToPdf($args, $request): JSONMessage
+    public function convert($params, $request): JSONMessage
     {
-        error_log("LatexConverterHandler > convertToPdf");
-
-        return new JSONMessage(true, array(
-            'submissionId' => '51'
-        ));
+        $action = new Convert($this->plugin, $request, $params);
+        return $action->execute();
     }
 }

@@ -7,6 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'TIBHannover\\LatexConverter\\Action\\Convert' => $baseDir . '/classes/Action/Convert.inc.php',
+    'TIBHannover\\LatexConverter\\Action\\Extract' => $baseDir . '/classes/Action/Extract.inc.php',
     'TIBHannover\\LatexConverter\\Components\\Forms\\SettingsForm' => $baseDir . '/classes/Components/Forms/SettingsForm.inc.php',
-    'TIBHannover\\LatexConverter\\Handler\\LatexConverterHandler' => $baseDir . '/classes/Handler/LatexConverterHandler.inc.php',
+    'TIBHannover\\LatexConverter\\Handler\\PluginHandler' => $baseDir . '/classes/Handler/PluginHandler.inc.php',
 );
