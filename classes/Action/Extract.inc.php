@@ -21,8 +21,6 @@ use GenreDAO;
 use JSONMessage;
 use NotificationManager;
 use PrivateFileManager;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use Services;
 use SubmissionDAO;
 use SubmissionFileDAO;
@@ -138,7 +136,7 @@ class Extract
             $this->submissionFile->getData('path');
 
         $this->archiveExtractedAbsoluteDirPath =
-            str_replace('.zip', '_zip', $this->archiveAbsoluteFilePath) . '_' . $this->timeStamp;
+            tempnam(sys_get_temp_dir(), LATEX_CONVERTER_PLUGIN_NAME . '_') . '_' . $this->timeStamp;
 
         $this->submissionFilesRelativeDir = Services::get('submissionFile')->getSubmissionDir(
             $this->submission->getData('contextId'), $this->submissionId);
@@ -401,9 +399,5 @@ class Extract
         if (file_exists($this->archiveExtractedAbsoluteDirPath)) {
             $this->removeDirectoryAndContentsRecursively($this->archiveExtractedAbsoluteDirPath);
         }
-
-//        $log[] = ["insertedNewSubmissionFile" => $this->insertedNewSubmissionFile];
-//        $log[] = ["insertedNewDependentSubmissionFiles" => $this->insertedNewDependentSubmissionFiles];
-//        error_log(json_encode($log, JSON_UNESCAPED_SLASHES));
     }
 }

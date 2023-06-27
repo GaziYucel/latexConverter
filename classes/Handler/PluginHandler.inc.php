@@ -25,6 +25,9 @@ use TIBHannover\LatexConverter\Action\Extract;
 
 class PluginHandler extends Handler
 {
+    /**
+     * @var object LatexConverterPlugin
+     */
     protected object $plugin;
 
     /**
