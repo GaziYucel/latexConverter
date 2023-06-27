@@ -12,7 +12,6 @@
  * @brief Plugin LatexConverter
  */
 
-const LATEX_CONVERTER_IS_PRODUCTION_KEY = 'LatexConverter_IsProductionEnvironment';
 const LATEX_CONVERTER_PLUGIN_PATH = __DIR__;
 const LATEX_CONVERTER_ZIP_FILE_TYPE = 'application/zip';
 const LATEX_CONVERTER_LATEX_FILE_TYPE = 'text/x-tex';
@@ -23,6 +22,7 @@ const LATEX_CONVERTER_IMAGE_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png', 'jpe'];
 const LATEX_CONVERTER_HTML_EXTENSIONS = ['htm', 'html'];
 const LATEX_CONVERTER_STYLE_EXTENSIONS = ['css'];
 const LATEX_CONVERTER_AUTHORIZED_ROLES = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
+const LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES = 'LatexConverter_AuthorisedMimeTypes';
 
 require_once(LATEX_CONVERTER_PLUGIN_PATH . '/vendor/autoload.php');
 
@@ -43,6 +43,8 @@ class LatexConverterPlugin extends GenericPlugin
             if ($this->getEnabled()) {
                 HookRegistry::register('TemplateManager::fetch', [$this, 'templateFetchCallback']);
                 HookRegistry::register('LoadHandler', [$this, 'callbackLoadHandler']);
+
+                HookRegistry::register('SubmissionFile::supportsDependentFiles', [$this, 'callbackSupportsDependentFiles']);
 
                 $this->_registerTemplateResource();
             }
@@ -102,6 +104,7 @@ class LatexConverterPlugin extends GenericPlugin
 
                     // only show link if file is zip
                     if (strtolower($fileExtension) == LATEX_CONVERTER_ZIP_FILE_TYPE) {
+
                         $path = $dispatcher->url($request, ROUTE_PAGE, null,
                             'latexConverter', 'extract', null, $actionArgs);
 
@@ -112,14 +115,15 @@ class LatexConverterPlugin extends GenericPlugin
                             new PostAndRedirectAction($path, $pathRedirect),
                             __('plugins.generic.latexConverter.button.extract')
                         ));
-                    } // only show link if file is tex
-                    elseif (strtolower($fileExtension) == LATEX_CONVERTER_LATEX_FILE_TYPE) {
+                    } // only show link if file is tex and is not dependent file (assocId is null)
+                    elseif (strtolower($fileExtension) == LATEX_CONVERTER_LATEX_FILE_TYPE
+                        && empty($submissionFile->getData('assocId'))) {
 
                         $path = $dispatcher->url($request, ROUTE_PAGE, null,
                             'latexConverter', 'convert', null, $actionArgs);
 
                         import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
-
+                        
                         $row->addAction(new LinkAction(
                             'latexconverter_convert_to_pdf',
                             new PostAndRedirectAction($path, $pathRedirect),
@@ -152,6 +156,34 @@ class LatexConverterPlugin extends GenericPlugin
         }
 
         return false;
+    }
+
+    /**
+     * Add mimetypes which support dependent files
+     * @param $hookName
+     * @param $args
+     * @return void
+     */
+    public function callbackSupportsDependentFiles($hookName, $args): void
+    {
+        $result = &$args[0];
+        $submissionFile = $args[1];
+
+        $fileStage = $submissionFile->getData('fileStage');
+        $excludedFileStages = [
+            SUBMISSION_FILE_DEPENDENT,
+            SUBMISSION_FILE_QUERY,
+        ];
+
+        $allowedMimetypes = ['text/x-tex', 'application/x-tex'];
+        $allowedMimetypesDb = $this->getSetting($this->getCurrentContextId(),
+            LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES);
+        if (!empty($allowedMimetypesDb))
+            $allowedMimetypes = array_filter(preg_split("/\r\n|\n|\r/", $allowedMimetypesDb));
+
+        $result =
+            !in_array($fileStage, $excludedFileStages) &&
+            in_array($submissionFile->getData('mimetype'), $allowedMimetypes);
     }
 
     /**

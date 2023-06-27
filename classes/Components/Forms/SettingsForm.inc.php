@@ -35,7 +35,7 @@ class SettingsForm extends \Form
      * @var string[]
      */
     private array $settings = [
-        LATEX_CONVERTER_IS_PRODUCTION_KEY
+        LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES
     ];
 
     /**
@@ -106,13 +106,6 @@ class SettingsForm extends \Form
 
         foreach ($this->settings as $key) {
             $value = $this->getData($key);
-
-            if ($key === OPTIMETA_CITATIONS_FRONTEND_SHOW_STRUCTURED && !empty($value)) {
-                $value = "true";
-            } else if ($key === OPTIMETA_CITATIONS_IS_PRODUCTION_KEY && !empty($value)) {
-                $value = "true";
-            }
-
             $this->plugin->updateSetting($contextId, $key, $value);
         }
 
