@@ -37,11 +37,12 @@ class LatexConverterPlugin extends GenericPlugin
      */
     function register($category, $path, $mainContextId = null): bool
     {
-        define("LATEX_CONVERTER_PLUGIN_NAME", $this->getName());
+        if (!defined("LATEX_CONVERTER_PLUGIN_NAME"))
+            define("LATEX_CONVERTER_PLUGIN_NAME", $this->getName());
 
         if (parent::register($category, $path, $mainContextId)) {
             if ($this->getEnabled()) {
-                HookRegistry::register('TemplateManager::fetch', [$this, 'templateFetchCallback']);
+                HookRegistry::register('TemplateManager::fetch', [$this, 'callbackTemplateFetch']);
                 HookRegistry::register('LoadHandler', [$this, 'callbackLoadHandler']);
 
                 HookRegistry::register('SubmissionFile::supportsDependentFiles', [$this, 'callbackSupportsDependentFiles']);
@@ -58,10 +59,10 @@ class LatexConverterPlugin extends GenericPlugin
     /**
      * Adds additional links to submission files grid row
      * @param $hookName string The name of the invoked hook
-     * @param $args array Hook parameters
+     * @param $args array Hook parameters [PKPTemplateManager, $template, $cache_id, $compile_id, &$result]
      * @return void
      */
-    public function templateFetchCallback(string $hookName, array $args): void
+    public function callbackTemplateFetch(string $hookName, array $args): void
     {
         $request = $this->getRequest();
         $dispatcher = $request->getDispatcher();
@@ -137,11 +138,11 @@ class LatexConverterPlugin extends GenericPlugin
 
     /**
      * Execute PluginHandler
-     * @param $hookName
-     * @param $args
+     * @param $hookName string
+     * @param $args array Hook parameters [&$page, &$op, &$sourceFile]
      * @return bool
      */
-    public function callbackLoadHandler($hookName, $args): bool
+    public function callbackLoadHandler(string $hookName, array $args): bool
     {
         $page = $args[0];
         $op = $args[1];
@@ -160,11 +161,11 @@ class LatexConverterPlugin extends GenericPlugin
 
     /**
      * Add mimetypes which support dependent files
-     * @param $hookName
-     * @param $args
+     * @param $hookName string
+     * @param $args array Hook parameters [&$result, $submissionFile]
      * @return void
      */
-    public function callbackSupportsDependentFiles($hookName, $args): void
+    public function callbackSupportsDependentFiles(string $hookName, array $args): void
     {
         $result = &$args[0];
         $submissionFile = $args[1];
