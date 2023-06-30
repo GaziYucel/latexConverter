@@ -43,6 +43,12 @@ class Convert
      */
     private function convert(): JSONMessage
     {
+		$conversionStatus = false;
+		if(!$conversionStatus)
+		{
+		$message =  readfile(); //TODO
+		$this->plugin->logError($message);
+		}
         return new JSONMessage(true, ['submissionId' => '51']);
     }
 }
