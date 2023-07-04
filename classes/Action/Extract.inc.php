@@ -162,10 +162,16 @@ class Extract
         if (!$this->processArchiveContent()) return $this->defaultResponse();
 
         // add main file
-        if (!$this->addMainFile()) return $this->defaultResponse();
+        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
+            $this->archiveExtractedAbsoluteDirPath, $this->submissionFilesRelativeDir, $this->mainFileName,
+            $this->dependentFileNames);
+
+        if (!empty($this->mainFileName))
+            if (!$articleGalley->addMainFile()) return $this->defaultResponse();
 
         // add dependent files
-        if (!$this->addDependentFiles()) return $this->defaultResponse();
+        if (!empty($this->dependentFileNames))
+            if (!$articleGalley->addDependentFiles()) return $this->defaultResponse();
 
         // all went well, return ok
         return $this->defaultResponse(true);
@@ -248,103 +254,6 @@ class Extract
 
                 return false;
             }
-        }
-
-        return true;
-    }
-
-    /**
-     * Add the main file
-     * @return bool
-     */
-    private function addMainFile(): bool
-    {
-        $newFileExtension = pathinfo($this->mainFileName, PATHINFO_EXTENSION);
-        $newFileNameReal = uniqid() . '.' . $newFileExtension;
-        $newFileNameDisplay = [];
-        foreach ($this->submissionFile->getData('name') as $localeKey => $name) {
-            $newFileNameDisplay[$localeKey] = pathinfo($name)['filename'] . '.' . $newFileExtension;
-        }
-
-        // add file to file system
-        $newFileId = Services::get('file')->add(
-            $this->archiveExtractedAbsoluteDirPath . DIRECTORY_SEPARATOR . $this->mainFileName,
-            $this->submissionFilesRelativeDir . DIRECTORY_SEPARATOR . $newFileNameReal);
-
-        // add file link to database
-        $newFileParams = [
-            'fileId' => $newFileId,
-            'assocId' => $this->submissionFile->getData('assocId'),
-            'assocType' => $this->submissionFile->getData('assocType'),
-            'fileStage' => $this->submissionFile->getData('fileStage'),
-            'mimetype' => LATEX_CONVERTER_LATEX_FILE_TYPE,
-            'locale' => $this->submissionFile->getData('locale'),
-            'genreId' => $this->submissionFile->getData('genreId'),
-            'name' => $newFileNameDisplay,
-            'submissionId' => $this->submissionId
-        ];
-        $submissionFileDao = new SubmissionFileDAO();
-        $newFileObject = $submissionFileDao->newDataObject();
-        $newFileObject->setAllData($newFileParams);
-        $insertedNewFileObject = Services::get('submissionFile')->add($newFileObject, $this->request);
-
-        if (empty($insertedNewFileObject)) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.defaultErrorOccurred'));
-
-            return false;
-        }
-
-        $this->insertedNewSubmissionFile = $insertedNewFileObject;
-
-        return true;
-    }
-
-    /**
-     * Add dependent files
-     * @return bool
-     */
-    private function addDependentFiles(): bool
-    {
-        foreach ($this->dependentFileNames as $fileName) {
-            $newFileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-            $newFileNameReal = uniqid() . '.' . $newFileExtension;
-            $newFileNameDisplay = [];
-            foreach ($this->submissionFile->getData('name') as $localeKey => $name) {
-                $newFileNameDisplay[$localeKey] = pathinfo($fileName, PATHINFO_BASENAME);
-            }
-
-            // add file to file system
-            $newFileId = Services::get('file')->add(
-                $this->archiveExtractedAbsoluteDirPath . DIRECTORY_SEPARATOR . $fileName,
-                $this->submissionFilesRelativeDir . DIRECTORY_SEPARATOR . $newFileNameReal);
-
-            // determine genre (see table genres and genre_settings)
-            $newFileGenreId = 12; // OTHER
-            if (in_array(pathinfo($fileName, PATHINFO_EXTENSION),
-                LATEX_CONVERTER_IMAGE_EXTENSIONS)) {
-                $newFileGenreId = 10; // IMAGE
-            } elseif (in_array(pathinfo($fileName, PATHINFO_EXTENSION),
-                LATEX_CONVERTER_STYLE_EXTENSIONS)) {
-                $newFileGenreId = 11; // STYLE
-            }
-
-            // add file link to database
-            $newFileParams = [
-                'fileId' => $newFileId,
-                'assocId' => $this->insertedNewSubmissionFile->getId(),
-                'assocType' => ASSOC_TYPE_SUBMISSION_FILE,
-                'fileStage' => SUBMISSION_FILE_DEPENDENT,
-                'submissionId' => $this->submission->getId(),
-                'genreId' => $newFileGenreId,
-                'name' => $newFileNameDisplay
-            ];
-            $submissionFileDao = new SubmissionFileDAO();
-            $newFileObject = $submissionFileDao->newDataObject();
-            $newFileObject->setAllData($newFileParams);
-            $insertedNewFileObject = Services::get('submissionFile')->add($newFileObject, $this->request);
-
-            $this->insertedNewDependentSubmissionFiles[] = $insertedNewFileObject;
         }
 
         return true;
