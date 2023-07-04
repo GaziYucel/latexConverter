@@ -43,12 +43,13 @@ class Convert
      */
     private function convert(): JSONMessage
     {
-		$conversionStatus = false;
-		if(!$conversionStatus)
-		{
-		$message =  readfile(); //TODO
-		$this->plugin->logError($message);
+		//TODO result folder
+		$resultPath = '';
+		if (count(glob($resultPath . '/*.pdf') != 1)) {
+			foreach (glob($resultPath . '/*.log') as $errorLog) {
+				$this->plugin->logError(file_get_contents($resultPath.'/'.$errorLog));
+			}
 		}
-        return new JSONMessage(true, ['submissionId' => '51']);
+		return new JSONMessage(true, ['submissionId' => '51']);
     }
 }
