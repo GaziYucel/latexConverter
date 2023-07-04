@@ -89,14 +89,14 @@ class Extract
 
     /**
      * Absolute path to the archive file
-     * e.g. c:/ojs_files/journals/1/articles/51/648b243110d7e.zip
+     * e.g. /var/www/ojs_files/journals/1/articles/51/648b243110d7e.zip
      * @var string
      */
     protected string $archiveAbsoluteFilePath;
 
     /**
      * Absolute path to the directory with the extracted content of archive
-     * e.g. c:/ojs_files/journals/1/articles/51/648b243110d7e_zip_extracted
+     * e.g. /var/tmp/648b243110d7e_zip_extracted
      * @var string
      */
     protected string $archiveExtractedAbsoluteDirPath;
