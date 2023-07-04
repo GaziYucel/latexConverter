@@ -264,24 +264,27 @@ class LatexConverterPlugin extends GenericPlugin
         return __('plugins.generic.latexConverter.description');
     }
 
-	public static function logFilePath() {
-		return Config::getVar('files', 'files_dir') . '/latexConverter.log';
-	}
+    public static function logFilePath()
+    {
+        return Config::getVar('files', 'files_dir') . '/latexConverter.log';
+    }
 
-	/**
-	 * Write a message with specified level to log
-	 *
-	 * @param  $message string Message to write
-	 * @param  $level   string Error level to add to message
-	 * @return void
-	 */
-	protected static function writeLog($message, $level) {
-		$fineStamp = date('Y-m-d H:i:s') . substr(microtime(), 1, 4);
-		error_log("$fineStamp $level $message\n", 3, self::logFilePath());
-	}
+    /**
+     * Write a message with specified level to log
+     *
+     * @param  $message string Message to write
+     * @param  $level   string Error level to add to message
+     * @return void
+     */
+    protected static function writeLog($message, $level)
+    {
+        $fineStamp = date('Y-m-d H:i:s') . substr(microtime(), 1, 4);
+        error_log("$fineStamp $level $message\n", 3, self::logFilePath());
+    }
 
-	public function logError($message) {
-		self::writeLog($message, 'ERROR');
-	}
+    public function logError($message)
+    {
+        self::writeLog($message, 'ERROR');
+    }
 
 }
