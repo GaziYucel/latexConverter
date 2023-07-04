@@ -12,6 +12,8 @@ class ComposerStaticInit0696d5303e0b54e4c8ddebe750ffb5ad
         'TIBHannover\\LatexConverter\\Action\\Extract' => __DIR__ . '/../..' . '/classes/Action/Extract.inc.php',
         'TIBHannover\\LatexConverter\\Components\\Forms\\SettingsForm' => __DIR__ . '/../..' . '/classes/Components/Forms/SettingsForm.inc.php',
         'TIBHannover\\LatexConverter\\Handler\\PluginHandler' => __DIR__ . '/../..' . '/classes/Handler/PluginHandler.inc.php',
+        'TIBHannover\\LatexConverter\\Models\\ArticleGalley' => __DIR__ . '/../..' . '/classes/Models/ArticleGalley.inc.php',
+        'TIBHannover\\LatexConverter\\Models\\Cleanup' => __DIR__ . '/../..' . '/classes/Models/Cleanup.inc.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
