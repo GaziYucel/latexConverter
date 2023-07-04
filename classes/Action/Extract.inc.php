@@ -81,18 +81,6 @@ class Extract
     protected int $submissionFileId;
 
     /**
-     * This is the newly inserted main file object
-     * @var object SubmissionFile
-     */
-    protected object $insertedNewSubmissionFile;
-
-    /**
-     * This array is a list of SubmissionFile objects
-     * @var array [ SubmissionFile, ... ]
-     */
-    protected array $insertedNewDependentSubmissionFiles = [];
-
-    /**
      * Absolute path to the archive file
      * e.g. /var/www/ojs_files/journals/1/articles/51/648b243110d7e.zip
      * @var string
@@ -208,16 +196,15 @@ class Extract
             return false;
         }
 
-        if(!mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true)){
-		return  false;
-		}
+        if (!mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true)) {
+            return false;
+        }
 
-		$zip->extractTo($this->archiveExtractedAbsoluteDirPath);
-		$zip->close();
+        $zip->extractTo($this->archiveExtractedAbsoluteDirPath);
 
+        $zip->close();
 
-
-		return true;
+        return true;
     }
 
     /**
