@@ -24,14 +24,13 @@ namespace TIBHannover\LatexConverter\Action;
 import('lib.pkp.classes.file.PrivateFileManager');
 import('lib.pkp.classes.submission.GenreDAO');
 
-use GenreDAO;
 use JSONMessage;
 use NotificationManager;
 use PrivateFileManager;
 use Services;
 use SubmissionDAO;
-use SubmissionFileDAO;
 use ZipArchive;
+use TIBHannover\LatexConverter\Models\ArticleGalley;
 use TIBHannover\LatexConverter\Models\Cleanup;
 
 class Extract
