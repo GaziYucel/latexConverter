@@ -46,6 +46,11 @@ class Extract
     protected PrivateFileManager $fileManager;
 
     /**
+     * @var NotificationManager
+     */
+    protected NotificationManager $notificationManager;
+
+    /**
      * @var mixed Request
      */
     protected mixed $request;
@@ -130,6 +135,8 @@ class Extract
 
         $this->fileManager = new PrivateFileManager();
 
+        $this->notificationManager = new NotificationManager();
+
         $this->request = $request;
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
@@ -185,8 +192,9 @@ class Extract
     {
         // check archive type, if not zip return false
         if ($this->request->getUserVar("archiveType") !== LATEX_CONVERTER_ZIP_FILE_TYPE) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.noValidZipFile'));
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.noValidZipFile')));
 
             return false;
         }
@@ -194,8 +202,9 @@ class Extract
         $zip = new ZipArchive();
 
         if (!$zip->open($this->archiveAbsoluteFilePath)) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.errorOpeningFile'));
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.errorOpeningFile')));
             return false;
         }
 
@@ -233,9 +242,9 @@ class Extract
 
         // decide what to do according to tex files found
         if (count($texFiles) === 0) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.noTexFileFound'));
-
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.noTexFileFound')));
             return false;
         } else {
             foreach ($texFiles as $fileName) {
@@ -246,30 +255,17 @@ class Extract
                 }
             }
 
-            // no main file found, notify and return
+            // no main file found, notify and return 
             if (empty($this->mainFileName)) {
-                $this->notifyUser($this->request->getUser(),
-                    __('plugins.generic.latexConverter.notification.multipleTexFilesFound',
-                        ['value' => LATEX_CONVERTER_MAIN_FILENAME]));
-
+                $this->notificationManager->createTrivialNotification(
+                    $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                    array('contents' => __('plugins.generic.latexConverter.notification.multipleTexFilesFound',
+                        ['value' => LATEX_CONVERTER_MAIN_FILENAME])));
                 return false;
             }
         }
 
         return true;
-    }
-
-    /**
-     * Notify user with status code and message
-     * @param $user
-     * @param $message
-     * @param int $errorType
-     * @return void
-     */
-    private function notifyUser($user, $message, int $errorType = NOTIFICATION_TYPE_ERROR): void
-    {
-        $notificationMgr = new NotificationManager();
-        $notificationMgr->createTrivialNotification($user->getId(), $errorType, array('contents' => $message));
     }
 
     /**
