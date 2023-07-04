@@ -364,29 +364,6 @@ class Extract
     }
 
     /**
-     * Delete folder and its contents recursively
-     * @note Adapted from https://www.php.net/manual/de/function.rmdir.php#117354
-     * @param $src
-     * @return void
-     */
-    private function removeDirectoryAndContentsRecursively($src): void
-    {
-        $dir = opendir($src);
-        while (false !== ($file = readdir($dir))) {
-            if (($file != '.') && ($file != '..')) {
-                $full = $src . '/' . $file;
-                if (is_dir($full)) {
-                    $this->removeDirectoryAndContentsRecursively($full);
-                } else {
-                    unlink($full);
-                }
-            }
-        }
-        closedir($dir);
-        rmdir($src);
-    }
-
-    /**
      * Default response
      * Only submissionId is returned as a JSONMessage
      * @param bool $status
@@ -400,7 +377,8 @@ class Extract
     function __destruct()
     {
         if (file_exists($this->archiveExtractedAbsoluteDirPath)) {
-            $this->removeDirectoryAndContentsRecursively($this->archiveExtractedAbsoluteDirPath);
+            $cleanup = new Cleanup();
+            $cleanup->removeDirectoryAndContentsRecursively($this->archiveExtractedAbsoluteDirPath);
         }
     }
 }
