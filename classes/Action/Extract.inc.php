@@ -32,6 +32,7 @@ use Services;
 use SubmissionDAO;
 use SubmissionFileDAO;
 use ZipArchive;
+use TIBHannover\LatexConverter\Models\Cleanup;
 
 class Extract
 {
