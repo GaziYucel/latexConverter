@@ -32,6 +32,6 @@ rm -rf tmp
 
 ### Manual usage of pdflatex
 - `cd /path-to-some-latex-project`
-- `/var/www/TexLive/texmf/bin/x86_64_linux/pdflatex -interaction=nonstopmode main.tex`
+- `/var/www/TexLive/texmf/bin/x86_64_linux/pdflatex -no-shell-escape -interaction=nonstopmode main.tex`
 
 
