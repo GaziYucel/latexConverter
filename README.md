@@ -5,9 +5,6 @@ The plugin for OJS 3.3 that allows to convert articles in Latex to PDF format.
 ## Manual installation of the plugin
 ```shell
 git clone https://github.com/GaziYucel/latexConverter
-cd latexConverter
-git submodule init
-git submodule update
 ```
 ## Configuration of the plugin
 - Login in your OJS instance as an Administrator or Manager
