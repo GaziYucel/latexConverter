@@ -10,6 +10,13 @@
  * @ingroup plugins_generic_latexconverter
  *
  * @brief Action Extract for the Handler
+ *
+ * Do the following depending on tex files found:
+ *   count = 0 : do nothing
+ *   count = 1 : make main file and others dependent files
+ *   count > 1 : make 'main.tex' mail file others dependent files
+ *   count > 1 : if no 'main.tex' found, do nothing
+ *
  */
 
 namespace TIBHannover\LatexConverter\Action;
@@ -144,11 +151,6 @@ class Extract
 
     /**
      * Main entry point
-     * Do the following depending on tex files found:
-     *     count = 0 : do nothing
-     *     count = 1 : make main file and others dependent files
-     *     count > 1 : make 'main.tex' mail file others dependent files
-     *     count > 1 : if no 'main.tex' found, do nothing
      * @return JSONMessage
      */
     public function execute(): JSONMessage
