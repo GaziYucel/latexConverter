@@ -185,21 +185,22 @@ class Extract
 
         $zip = new ZipArchive();
 
-        $zipStatus = $zip->open($this->archiveAbsoluteFilePath);
-
-        if ($zipStatus !== true) {
+        if (!$zip->open($this->archiveAbsoluteFilePath)) {
             $this->notifyUser($this->request->getUser(),
                 __('plugins.generic.latexConverter.notification.errorOpeningFile'));
             return false;
         }
 
-        mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true);
+        if(!mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true)){
+		return  false;
+		}
 
-        $zip->extractTo($this->archiveExtractedAbsoluteDirPath);
+		$zip->extractTo($this->archiveExtractedAbsoluteDirPath);
+		$zip->close();
 
-        $zip->close();
 
-        return true;
+
+		return true;
     }
 
     /**
@@ -237,7 +238,7 @@ class Extract
                 }
             }
 
-            // no main file found, notify and return 
+            // no main file found, notify and return
             if (empty($this->mainFileName)) {
                 $this->notifyUser($this->request->getUser(),
                     __('plugins.generic.latexConverter.notification.multipleTexFilesFound',
