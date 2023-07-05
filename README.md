@@ -2,6 +2,32 @@
 
 The plugin for OJS 3.3 that allows to convert articles in Latex to PDF format.
 
+## Features
+### Extract LaTex from Zip
+This functionality is shown if there is a ZIP file present in the Production phase.
+
+Clicking this button will do the following: 
+- extract ZIP archive
+- check if there is a single file present with the extension "tex": if so add this as main
+- if there are multiple tex files: 
+  - if there is main.tex file present, add this as the main file
+  - if there is no main.tex, skip altogether
+- add all other files as dependent files
+
+### Convert to PDF
+This functionality is shown for all files with the extension TEX in the Production phase.
+
+Clicking this button will do the following:
+- copy all files to temp file for processing
+- execute pdflatex from shell
+- check if there is a compiled pdf present:
+  - if there is a pdf file
+    - add this file the submission
+    - add other output files as dependent files (aux, bcf, log, out, run.xml)
+  - if there is no pdf file, than something went wrong
+    - add the log file to the submission
+    - add other output files as dependent files (aux, bcf, out, run.xml)
+
 ## Requirements
 - PHP 8.0,8.1
 - TexLive for your platform
