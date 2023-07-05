@@ -287,4 +287,17 @@ class LatexConverterPlugin extends GenericPlugin
         self::writeLog($message, 'ERROR');
     }
 
+	public function getSetting($contextId, $name)
+	{
+		switch ($name) {
+			case 'LatexConverter_PathToExecutable':
+				$config_value = Config::getVar('latex', 'latexExe');
+				break;
+			default:
+				return parent::getSetting($contextId, $name);
+		}
+		return $config_value ?: parent::getSetting($contextId, $name);
+
+	}
+
 }
