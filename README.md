@@ -2,10 +2,15 @@
 
 The plugin for OJS 3.3 that allows to convert articles in Latex to PDF format.
 
+## Requirements
+- PHP 8.0,8.1
+- TexLive for your platform
+
 ## Manual installation of the plugin
 ```shell
 git clone https://github.com/GaziYucel/latexConverter
 ```
+Alternatively, you can download the latest release or download the code with the option 'Download ZIP'. Extract the downloaded file to `./plugins/generic/latexConverter`.
 
 ## Configuration of the plugin
 - Login in your OJS instance as an Administrator or Manager
@@ -17,6 +22,7 @@ git clone https://github.com/GaziYucel/latexConverter
 ## Installation of TexLive portable on Linux
 ```shell
 # example of installation path: /var/www/TexLive
+# TexLive will be installed with all packages and options (around 8GB)
 mkdir -p /var/www/TexLive/tmp
 cd /var/www/TexLive/tmp
 wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
@@ -28,8 +34,19 @@ cd /var/www/TexLive
 rm -rf tmp
 ```
 
-### Manual usage of pdflatex
+## Manual usage of pdflatex
 - `cd /path-to-some-latex-project`
 - `/var/www/TexLive/texmf/bin/x86_64_linux/pdflatex -no-shell-escape -interaction=nonstopmode main.tex`
 
+## Development
 
+- Fork the repository
+- Make your changes
+- Open a PR with your changes
+
+## Development notes
+- Auto loading of the classes in the folder `classes` is done with composer [classmap](https://getcomposer.org/doc/04-schema.md#classmap). There are no dependencies for this plugin, thus composer is only used for this purpose: 
+  - if you add or remove classes in this folder, run the following command to update the autoload files: `composer dump-autoload -o`;
+  - the `-o` option generates the optimised files ready for production. 
+
+...
