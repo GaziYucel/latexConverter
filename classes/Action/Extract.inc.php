@@ -10,6 +10,13 @@
  * @ingroup plugins_generic_latexconverter
  *
  * @brief Action Extract for the Handler
+ *
+ * Do the following depending on tex files found:
+ *   count = 0 : do nothing
+ *   count = 1 : make main file and others dependent files
+ *   count > 1 : make 'main.tex' mail file others dependent files
+ *   count > 1 : if no 'main.tex' found, do nothing
+ *
  */
 
 namespace TIBHannover\LatexConverter\Action;
@@ -17,14 +24,14 @@ namespace TIBHannover\LatexConverter\Action;
 import('lib.pkp.classes.file.PrivateFileManager');
 import('lib.pkp.classes.submission.GenreDAO');
 
-use GenreDAO;
 use JSONMessage;
 use NotificationManager;
 use PrivateFileManager;
 use Services;
 use SubmissionDAO;
-use SubmissionFileDAO;
 use ZipArchive;
+use TIBHannover\LatexConverter\Models\ArticleGalley;
+use TIBHannover\LatexConverter\Models\Cleanup;
 
 class Extract
 {
@@ -37,6 +44,11 @@ class Extract
      * @var PrivateFileManager
      */
     protected PrivateFileManager $fileManager;
+
+    /**
+     * @var NotificationManager
+     */
+    protected NotificationManager $notificationManager;
 
     /**
      * @var mixed Request
@@ -69,27 +81,15 @@ class Extract
     protected int $submissionFileId;
 
     /**
-     * This is the newly inserted main file object
-     * @var object SubmissionFile
-     */
-    protected object $insertedNewSubmissionFile;
-
-    /**
-     * This array is a list of SubmissionFile objects
-     * @var array [ SubmissionFile, ... ]
-     */
-    protected array $insertedNewDependentSubmissionFiles = [];
-
-    /**
      * Absolute path to the archive file
-     * e.g. c:/ojs_files/journals/1/articles/51/648b243110d7e.zip
+     * e.g. /var/www/ojs_files/journals/1/articles/51/648b243110d7e.zip
      * @var string
      */
     protected string $archiveAbsoluteFilePath;
 
     /**
      * Absolute path to the directory with the extracted content of archive
-     * e.g. c:/ojs_files/journals/1/articles/51/648b243110d7e_zip_extracted
+     * e.g. /var/tmp/648b243110d7e_zip_extracted
      * @var string
      */
     protected string $archiveExtractedAbsoluteDirPath;
@@ -123,6 +123,8 @@ class Extract
 
         $this->fileManager = new PrivateFileManager();
 
+        $this->notificationManager = new NotificationManager();
+
         $this->request = $request;
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
@@ -144,11 +146,6 @@ class Extract
 
     /**
      * Main entry point
-     * Do the following depending on tex files found:
-     *     count = 0 : do nothing
-     *     count = 1 : make main file and others dependent files
-     *     count > 1 : make 'main.tex' mail file others dependent files
-     *     count > 1 : if no 'main.tex' found, do nothing
      * @return JSONMessage
      */
     public function execute(): JSONMessage
@@ -160,10 +157,16 @@ class Extract
         if (!$this->processArchiveContent()) return $this->defaultResponse();
 
         // add main file
-        if (!$this->addMainFile()) return $this->defaultResponse();
+        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
+            $this->archiveExtractedAbsoluteDirPath, $this->submissionFilesRelativeDir, $this->mainFileName,
+            $this->dependentFileNames);
+
+        if (!empty($this->mainFileName))
+            if (!$articleGalley->addMainFile()) return $this->defaultResponse();
 
         // add dependent files
-        if (!$this->addDependentFiles()) return $this->defaultResponse();
+        if (!empty($this->dependentFileNames))
+            if (!$articleGalley->addDependentFiles()) return $this->defaultResponse();
 
         // all went well, return ok
         return $this->defaultResponse(true);
@@ -177,8 +180,9 @@ class Extract
     {
         // check archive type, if not zip return false
         if ($this->request->getUserVar("archiveType") !== LATEX_CONVERTER_ZIP_FILE_TYPE) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.noValidZipFile'));
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.noValidZipFile')));
 
             return false;
         }
@@ -186,21 +190,21 @@ class Extract
         $zip = new ZipArchive();
 
         if (!$zip->open($this->archiveAbsoluteFilePath)) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.errorOpeningFile'));
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.errorOpeningFile')));
             return false;
         }
 
-        if(!mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true)){
-		return  false;
-		}
+        if (!mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true)) {
+            return false;
+        }
 
-		$zip->extractTo($this->archiveExtractedAbsoluteDirPath);
-		$zip->close();
+        $zip->extractTo($this->archiveExtractedAbsoluteDirPath);
 
+        $zip->close();
 
-
-		return true;
+        return true;
     }
 
     /**
@@ -225,9 +229,9 @@ class Extract
 
         // decide what to do according to tex files found
         if (count($texFiles) === 0) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.noTexFileFound'));
-
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.noTexFileFound')));
             return false;
         } else {
             foreach ($texFiles as $fileName) {
@@ -238,150 +242,17 @@ class Extract
                 }
             }
 
-            // no main file found, notify and return
+            // no main file found, notify and return 
             if (empty($this->mainFileName)) {
-                $this->notifyUser($this->request->getUser(),
-                    __('plugins.generic.latexConverter.notification.multipleTexFilesFound',
-                        ['value' => LATEX_CONVERTER_MAIN_FILENAME]));
-
+                $this->notificationManager->createTrivialNotification(
+                    $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                    array('contents' => __('plugins.generic.latexConverter.notification.multipleTexFilesFound',
+                        ['value' => LATEX_CONVERTER_MAIN_FILENAME])));
                 return false;
             }
         }
 
         return true;
-    }
-
-    /**
-     * Add the main file
-     * @return bool
-     */
-    private function addMainFile(): bool
-    {
-        $newFileExtension = pathinfo($this->mainFileName, PATHINFO_EXTENSION);
-        $newFileNameReal = uniqid() . '.' . $newFileExtension;
-        $newFileNameDisplay = [];
-        foreach ($this->submissionFile->getData('name') as $localeKey => $name) {
-            $newFileNameDisplay[$localeKey] = pathinfo($name)['filename'] . '.' . $newFileExtension;
-        }
-
-        // add file to file system
-        $newFileId = Services::get('file')->add(
-            $this->archiveExtractedAbsoluteDirPath . DIRECTORY_SEPARATOR . $this->mainFileName,
-            $this->submissionFilesRelativeDir . DIRECTORY_SEPARATOR . $newFileNameReal);
-
-        // add file link to database
-        $newFileParams = [
-            'fileId' => $newFileId,
-            'assocId' => $this->submissionFile->getData('assocId'),
-            'assocType' => $this->submissionFile->getData('assocType'),
-            'fileStage' => $this->submissionFile->getData('fileStage'),
-            'mimetype' => LATEX_CONVERTER_LATEX_FILE_TYPE,
-            'locale' => $this->submissionFile->getData('locale'),
-            'genreId' => $this->submissionFile->getData('genreId'),
-            'name' => $newFileNameDisplay,
-            'submissionId' => $this->submissionId
-        ];
-        $submissionFileDao = new SubmissionFileDAO();
-        $newFileObject = $submissionFileDao->newDataObject();
-        $newFileObject->setAllData($newFileParams);
-        $insertedNewFileObject = Services::get('submissionFile')->add($newFileObject, $this->request);
-
-        if (empty($insertedNewFileObject)) {
-            $this->notifyUser($this->request->getUser(),
-                __('plugins.generic.latexConverter.notification.defaultErrorOccurred'));
-
-            return false;
-        }
-
-        $this->insertedNewSubmissionFile = $insertedNewFileObject;
-
-        return true;
-    }
-
-    /**
-     * Add dependent files
-     * @return bool
-     */
-    private function addDependentFiles(): bool
-    {
-        foreach ($this->dependentFileNames as $fileName) {
-            $newFileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-            $newFileNameReal = uniqid() . '.' . $newFileExtension;
-            $newFileNameDisplay = [];
-            foreach ($this->submissionFile->getData('name') as $localeKey => $name) {
-                $newFileNameDisplay[$localeKey] = pathinfo($fileName, PATHINFO_BASENAME);
-            }
-
-            // add file to file system
-            $newFileId = Services::get('file')->add(
-                $this->archiveExtractedAbsoluteDirPath . DIRECTORY_SEPARATOR . $fileName,
-                $this->submissionFilesRelativeDir . DIRECTORY_SEPARATOR . $newFileNameReal);
-
-            // determine genre (see table genres and genre_settings)
-            $newFileGenreId = 12; // OTHER
-            if (in_array(pathinfo($fileName, PATHINFO_EXTENSION),
-                LATEX_CONVERTER_IMAGE_EXTENSIONS)) {
-                $newFileGenreId = 10; // IMAGE
-            } elseif (in_array(pathinfo($fileName, PATHINFO_EXTENSION),
-                LATEX_CONVERTER_STYLE_EXTENSIONS)) {
-                $newFileGenreId = 11; // STYLE
-            }
-
-            // add file link to database
-            $newFileParams = [
-                'fileId' => $newFileId,
-                'assocId' => $this->insertedNewSubmissionFile->getId(),
-                'assocType' => ASSOC_TYPE_SUBMISSION_FILE,
-                'fileStage' => SUBMISSION_FILE_DEPENDENT,
-                'submissionId' => $this->submission->getId(),
-                'genreId' => $newFileGenreId,
-                'name' => $newFileNameDisplay
-            ];
-            $submissionFileDao = new SubmissionFileDAO();
-            $newFileObject = $submissionFileDao->newDataObject();
-            $newFileObject->setAllData($newFileParams);
-            $insertedNewFileObject = Services::get('submissionFile')->add($newFileObject, $this->request);
-
-            $this->insertedNewDependentSubmissionFiles[] = $insertedNewFileObject;
-        }
-
-        return true;
-    }
-
-    /**
-     * Notify user with status code and message
-     * @param $user
-     * @param $message
-     * @param int $errorType
-     * @return void
-     */
-    private function notifyUser($user, $message, int $errorType = NOTIFICATION_TYPE_ERROR): void
-    {
-        $notificationMgr = new NotificationManager();
-        $notificationMgr->createTrivialNotification($user->getId(), $errorType, array('contents' => $message));
-    }
-
-    /**
-     * Delete folder and its contents recursively
-     * @note Adapted from https://www.php.net/manual/de/function.rmdir.php#117354
-     * @param $src
-     * @return void
-     */
-    private function removeDirectoryAndContentsRecursively($src): void
-    {
-        $dir = opendir($src);
-        while (false !== ($file = readdir($dir))) {
-            if (($file != '.') && ($file != '..')) {
-                $full = $src . '/' . $file;
-                if (is_dir($full)) {
-                    $this->removeDirectoryAndContentsRecursively($full);
-                } else {
-                    unlink($full);
-                }
-            }
-        }
-        closedir($dir);
-        rmdir($src);
     }
 
     /**
@@ -398,7 +269,8 @@ class Extract
     function __destruct()
     {
         if (file_exists($this->archiveExtractedAbsoluteDirPath)) {
-            $this->removeDirectoryAndContentsRecursively($this->archiveExtractedAbsoluteDirPath);
+            $cleanup = new Cleanup();
+            $cleanup->removeDirectoryAndContentsRecursively($this->archiveExtractedAbsoluteDirPath);
         }
     }
 }

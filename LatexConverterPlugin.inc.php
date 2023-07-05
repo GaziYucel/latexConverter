@@ -16,6 +16,8 @@ const LATEX_CONVERTER_PLUGIN_PATH = __DIR__;
 const LATEX_CONVERTER_ZIP_FILE_TYPE = 'application/zip';
 const LATEX_CONVERTER_LATEX_FILE_TYPE = 'text/x-tex';
 const LATEX_CONVERTER_TEX_EXTENSION = 'tex';
+const LATEX_CONVERTER_PDF_EXTENSION = 'pdf';
+const LATEX_CONVERTER_LOG_EXTENSION = 'log';
 const LATEX_CONVERTER_MAIN_FILENAME = 'main.' . LATEX_CONVERTER_TEX_EXTENSION;
 const LATEX_CONVERTER_TEX_EXTENSIONS = [LATEX_CONVERTER_TEX_EXTENSION];
 const LATEX_CONVERTER_IMAGE_EXTENSIONS = ['gif', 'jpg', 'jpeg', 'png', 'jpe'];
@@ -23,6 +25,7 @@ const LATEX_CONVERTER_HTML_EXTENSIONS = ['htm', 'html'];
 const LATEX_CONVERTER_STYLE_EXTENSIONS = ['css'];
 const LATEX_CONVERTER_AUTHORIZED_ROLES = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
 const LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES = 'LatexConverter_AuthorisedMimeTypes';
+const LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE = 'LatexConverter_PathToExecutable';
 
 require_once(LATEX_CONVERTER_PLUGIN_PATH . '/vendor/autoload.php');
 
@@ -261,24 +264,27 @@ class LatexConverterPlugin extends GenericPlugin
         return __('plugins.generic.latexConverter.description');
     }
 
-	public static function logFilePath() {
-		return Config::getVar('files', 'files_dir') . '/latexConverter.log';
-	}
+    public static function logFilePath()
+    {
+        return Config::getVar('files', 'files_dir') . '/latexConverter.log';
+    }
 
-	/**
-	 * Write a message with specified level to log
-	 *
-	 * @param  $message string Message to write
-	 * @param  $level   string Error level to add to message
-	 * @return void
-	 */
-	protected static function writeLog($message, $level) {
-		$fineStamp = date('Y-m-d H:i:s') . substr(microtime(), 1, 4);
-		error_log("$fineStamp $level $message\n", 3, self::logFilePath());
-	}
+    /**
+     * Write a message with specified level to log
+     *
+     * @param  $message string Message to write
+     * @param  $level   string Error level to add to message
+     * @return void
+     */
+    protected static function writeLog($message, $level)
+    {
+        $fineStamp = date('Y-m-d H:i:s') . substr(microtime(), 1, 4);
+        error_log("$fineStamp $level $message\n", 3, self::logFilePath());
+    }
 
-	public function logError($message) {
-		self::writeLog($message, 'ERROR');
-	}
+    public function logError($message)
+    {
+        self::writeLog($message, 'ERROR');
+    }
 
 }

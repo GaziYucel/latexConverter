@@ -17,8 +17,11 @@ msgstr "LaTex to PDF Converter Plugin"
 msgid "plugins.generic.latexConverter.description"
 msgstr "Transforms journal articles from LaTex to PDF format."
 
+msgid "plugins.generic.latexConverter.settings.path_executable.label"
+msgstr "Absolute path to LaTex executable.<br/> /httpdocs/plugins/generic/latexConverter/TexLive/texmf/bin/x86_64-linux/pdflatex"
+
 msgid "plugins.generic.latexConverter.settings.authorised_mime_types.label"
-msgstr "Allowed Mime Types. One per line, e.g. text/x-tex"
+msgstr "Allowed mimetypes.<br/>One mimetype per line, e.g. text/x-tex"
 
 msgid "plugins.generic.latexConverter.button.extract"
 msgstr "Extract LaTex from Zip"

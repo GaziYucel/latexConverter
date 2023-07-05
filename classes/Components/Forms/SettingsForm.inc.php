@@ -35,7 +35,8 @@ class SettingsForm extends \Form
      * @var string[]
      */
     private array $settings = [
-        LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES
+        LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES,
+        LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE
     ];
 
     /**

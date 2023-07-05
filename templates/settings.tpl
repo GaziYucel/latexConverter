@@ -15,17 +15,25 @@
 
     {fbvFormArea id="latexConverterSettingsArea"}
 
-    {fbvFormSection}
-        <p>
-            {fbvElement
-            type="textarea"
-            id="{$smarty.const.LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES}"
-            value=${$smarty.const.LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES}
-            label="plugins.generic.latexConverter.settings.authorised_mime_types.label"
-            description="plugins.generic.latexConverter.settings.authorised_mime_types.desciption"
-            }
-        </p>
-    {/fbvFormSection}
+        {fbvFormSection}
+            <p>
+                {fbvElement
+                    type="text"
+                    id="{$smarty.const.LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE}"
+                    value=${$smarty.const.LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE}
+                    label="plugins.generic.latexConverter.settings.path_executable.label"
+                }
+            </p>
+            <p> &nbsp; </p>
+            <p>
+                {fbvElement
+                    type="textarea"
+                    id="{$smarty.const.LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES}"
+                    value=${$smarty.const.LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES}
+                    label="plugins.generic.latexConverter.settings.authorised_mime_types.label"
+                }
+            </p>
+        {/fbvFormSection}
 
     {/fbvFormArea}
 
