@@ -94,11 +94,24 @@ class Convert
     protected string $ojsFilesAbsoluteBaseDir;
 
     /**
+     * The main and dependent files for this submission id
+     * @var array
+     */
+    protected array $submissionFileAndDependents = [];
+
+    /**
      * The name of the main tex file
      * e.g. main.tex
      * @var string
      */
     protected string $mainFileName = '';
+
+    /**
+     * The names of the dependent files
+     * e.g. [ 'image1.png', ... ]
+     * @var string[]
+     */
+    protected array $dependentFileNames = [];
 
     /**
      * Generated PDF file
@@ -114,13 +127,6 @@ class Convert
      */
     protected string $logFile = '';
 
-    /**
-     * The names of the dependent files
-     * e.g. [ 'image1.png', ... ]
-     * @var string[]
-     */
-    protected array $dependentFileNames = [];
-
     function __construct($plugin, $request, $params)
     {
         $this->timeStamp = date('Ymd_His');
@@ -133,6 +139,14 @@ class Convert
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
         $this->submissionFile = Services::get('submissionFile')->get($this->submissionFileId);
+
+        $this->mainFileName = $this->submissionFile->getData('name')[$this->submissionFile->getData('locale')];
+
+        $this->pdfFile = str_replace('.' . LATEX_CONVERTER_TEX_EXTENSION,
+            '.' . LATEX_CONVERTER_PDF_EXTENSION, $this->mainFileName);
+
+        $this->logFile = str_replace('.' . LATEX_CONVERTER_TEX_EXTENSION,
+            '.' . LATEX_CONVERTER_LOG_EXTENSION, $this->mainFileName);
 
         $submissionDao = new SubmissionDAO();
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
@@ -161,21 +175,21 @@ class Convert
             return $this->defaultResponse();
         }
 
-        // get files and copy file to working directory
-        if (!$this->getAndCopyFilesToWorkingDir()) {
+        // get submission file and dependent files
+        if (!$this->getSubmissionFileAndDependents()) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
             return $this->defaultResponse();
         }
 
-        // construct pdf file name
-        $this->pdfFile = str_replace('.' . LATEX_CONVERTER_TEX_EXTENSION,
-            '.' . LATEX_CONVERTER_PDF_EXTENSION, $this->mainFileName);
-
-        // construct log file name
-        $this->logFile = str_replace('.' . LATEX_CONVERTER_TEX_EXTENSION,
-            '.' . LATEX_CONVERTER_LOG_EXTENSION, $this->mainFileName);
+        // get files and copy file to working directory
+        if (!$this->copyFilesToWorkingDir()) {
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
+            return $this->defaultResponse();
+        }
 
         // do the conversion to pdf
         if (!$this->convertToPdf()) {
@@ -185,36 +199,46 @@ class Convert
             return $this->defaultResponse();
         }
 
-        // add converted pdf to submission files
-        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
-            $this->workingDirAbsolutePath, $this->submissionFilesRelativeDir, $this->pdfFile,
-            $this->dependentFileNames);
-        if (!$articleGalley->addMainFile()) return $this->defaultResponse();
+        // check if pdf file exists and add this as main file
+        if (file_exists($this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $this->pdfFile)) {
+            if (!$this->addFiles($this->pdfFile,
+                str_replace('.' . LATEX_CONVERTER_TEX_EXTENSION, '', $this->mainFileName)))
+                return $this->defaultResponse();
+        } // no pdf file found, check if log file exists and add this as main file
+        elseif (file_exists($this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $this->logFile)) {
+            if (!$this->addFiles($this->logFile,
+                str_replace('.' . LATEX_CONVERTER_TEX_EXTENSION, '', $this->mainFileName)))
+                return $this->defaultResponse();
+        } else {
+            return $this->defaultResponse();
+        }
 
         // all went well, return ok
         return $this->defaultResponse(true);
     }
 
     /**
-     * Convert LaTex file to pdf
+     * Get and return main and dependent files for this submissionFile
      * @return bool
      */
-    private function convertToPdf(): bool
+    private function getSubmissionFileAndDependents(): bool
     {
+        $allFiles = Services::get('submissionFile')->getMany([
+            'assocIds' => [$this->submissionId],
+            'submissionIds' => [$this->submissionId],
+            'includeDependentFiles' => true
+        ]);
 
-        $pdfLatexExe = $this->plugin->getSetting($this->request->getContext()->getId(),
-            LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
+        foreach ($allFiles as $file) {
+            if ($file->getData('id') == $this->submissionFileId)
+                $this->mainFileName = $file->getData('name')[$file->getData('locale')];
 
-        if (empty($pdfLatexExe)) {
-            $this->notificationManager->createTrivialNotification(
-                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
-                array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
-            return false;
+            if ($file->getData('id') == $this->submissionFileId ||
+                $file->getData('assocId') == $this->submissionFileId)
+                $this->submissionFileAndDependents[] = $file;
         }
 
-        $pdfLatexExe .= ' -no-shell-escape -interaction=nonstopmode';
-
-        shell_exec("cd $this->workingDirAbsolutePath && $pdfLatexExe $this->mainFileName");
+        if (empty($this->submissionFileAndDependents)) return false;
 
         return true;
     }
@@ -223,29 +247,62 @@ class Convert
      * Get files of submission and copy to working dir
      * @return bool
      */
-    private function getAndCopyFilesToWorkingDir(): bool
+    private function copyFilesToWorkingDir(): bool
     {
-        $files = Services::get('submissionFile')->getMany([
-            'assocIds' => [$this->submissionId],
-            'submissionIds' => [$this->submissionId],
-            'includeDependentFiles' => true
-        ]);
-
-        foreach ($files as $file) {
-            $fileName = $file->getData('name')[$file->getData('locale')];
-            $filePath = $file->getData('path');
-
-            if ($file->getData('id') == $this->submissionFileId)
-                $this->mainFileName = $fileName;
-
-            if ($file->getData('id') == $this->submissionFileId ||
-                $file->getData('assocId') == $this->submissionFileId) {
-                copy($this->ojsFilesAbsoluteBaseDir . DIRECTORY_SEPARATOR . $filePath,
-                    $this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $fileName);
-            }
+        foreach ($this->submissionFileAndDependents as $file) {
+            copy($this->ojsFilesAbsoluteBaseDir . DIRECTORY_SEPARATOR . $file->getData('path'),
+                $this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $file->getData('name')[$file->getData('locale')]);
         }
 
-        if (empty($this->mainFileName)) return false;
+        return true;
+    }
+
+    /**
+     * Convert LaTex file to pdf
+     * @return bool
+     */
+    private function convertToPdf(): bool
+    {
+        $pdfLatex = $this->plugin->getSetting(
+            $this->request->getContext()->getId(),
+            LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
+
+        if (empty($pdfLatex)) {
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
+            return false;
+        }
+
+        $pdfLatex .= ' -no-shell-escape -interaction=nonstopmode';
+
+        shell_exec("cd $this->workingDirAbsolutePath && $pdfLatex $this->mainFileName 2>&1");
+
+        return true;
+    }
+
+    /**
+     * Add output files to submission
+     * @param string $fileToAdd
+     * @param string $fileToAddWithoutExtension
+     * @return bool
+     */
+    private function addFiles(string $fileToAdd, string $fileToAddWithoutExtension): bool
+    {
+        $files = array_map('basename', glob($this->workingDirAbsolutePath . "/" . $fileToAddWithoutExtension . "*"));
+
+        foreach ($files as $file)
+            if ($file !== $this->mainFileName && $file !== $fileToAdd)
+                $this->dependentFileNames[] = $file;
+
+        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
+            $this->workingDirAbsolutePath, $this->submissionFilesRelativeDir, $fileToAdd,
+            $this->dependentFileNames);
+
+        if (!$articleGalley->addMainFile()) return false;
+
+        if (!empty($this->dependentFileNames))
+            if (!$articleGalley->addDependentFiles()) return false;
 
         return true;
     }
