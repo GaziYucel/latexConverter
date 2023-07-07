@@ -128,13 +128,10 @@ class LatexConverterPlugin extends GenericPlugin
 
 						import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
 
-						$converterButton = $this->getConvertButton();
-
-
 						$row->addAction(new LinkAction(
                             'latexconverter_convert_to_pdf',
                             new PostAndRedirectAction($path, $pathRedirect),
-							$converterButton
+							$this->getConvertButton()
                         ));
                     }
                 }
