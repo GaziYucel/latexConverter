@@ -126,12 +126,15 @@ class LatexConverterPlugin extends GenericPlugin
                         $path = $dispatcher->url($request, ROUTE_PAGE, null,
                             'latexConverter', 'convert', null, $actionArgs);
 
-                        import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
+						import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
 
-                        $row->addAction(new LinkAction(
+						$converterButton = $this->getConvertButton();
+
+
+						$row->addAction(new LinkAction(
                             'latexconverter_convert_to_pdf',
                             new PostAndRedirectAction($path, $pathRedirect),
-                            __('plugins.generic.latexConverter.button.convert')
+							$converterButton
                         ));
                     }
                 }
@@ -290,7 +293,7 @@ class LatexConverterPlugin extends GenericPlugin
 	public function getSetting($contextId, $name)
 	{
 		switch ($name) {
-			case 'LatexConverter_PathToExecutable':
+			case  LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE:
 				$config_value = Config::getVar('latex', 'latexExe');
 				break;
 			default:
@@ -298,6 +301,22 @@ class LatexConverterPlugin extends GenericPlugin
 		}
 		return $config_value ?: parent::getSetting($contextId, $name);
 
+	}
+
+	/**
+	 * Converter button depending on the latex executable status
+	 *
+	 * @return  string
+	 */
+	public function getConvertButton(): string
+	{
+		$latexExe = $this->getSetting($this->getRequest()->getContext()->getId(), LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
+		if (strlen($latexExe) == 0) {
+			return __('plugins.generic.latexConverter.executable.notConfigured');
+		} elseif (!is_executable($latexExe)) {
+			return __('plugins.generic.latexConverter.executable.notFound');
+		};
+		return __('plugins.generic.latexConverter.button.convert');
 	}
 
 }
