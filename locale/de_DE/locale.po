@@ -46,3 +46,10 @@ msgstr "Multiple Tex files found in ZIP file. Please make sure you include a \"{
 
 msgid "plugins.generic.latexConverter.notification.extracted"
 msgstr "File extraction successful"
+
+msgid "plugins.generic.latexConverter.executable.notFound"
+msgstr "Configured latex converter is unavailable"
+
+msgid "plugins.generic.latexConverter.executable.notConfigured"
+msgstr "Latex converter is  not configured"
+

@@ -18,10 +18,10 @@ msgid "plugins.generic.latexConverter.description"
 msgstr "Transforms journal articles from LaTex to PDF format."
 
 msgid "plugins.generic.latexConverter.settings.path_executable.label"
-msgstr "Absolute path to LaTex executable.<br/> /httpdocs/plugins/generic/latexConverter/TexLive/texmf/bin/x86_64-linux/pdflatex"
+msgstr "Absolute path to LaTex executable. e.g $MY_FOLDER/TexLive/texmf/bin/x86_64-linux/pdflatex"
 
 msgid "plugins.generic.latexConverter.settings.authorised_mime_types.label"
-msgstr "Allowed mimetypes.<br/>One mimetype per line, e.g. text/x-tex"
+msgstr "Allowed mimetypes. One mimetype per line, e.g. text/x-tex"
 
 msgid "plugins.generic.latexConverter.button.extract"
 msgstr "Extract LaTex from Zip"
@@ -46,3 +46,9 @@ msgstr "Multiple Tex files found in ZIP file. Please make sure you include a \"{
 
 msgid "plugins.generic.latexConverter.notification.extracted"
 msgstr "File extraction successful"
+
+msgid "plugins.generic.latexConverter.executable.notFound"
+msgstr "Configured latex converter is unavailable"
+
+msgid "plugins.generic.latexConverter.executable.notConfigured"
+msgstr "Latex converter is  not configured"
