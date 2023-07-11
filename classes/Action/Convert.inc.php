@@ -22,7 +22,7 @@ use NotificationManager;
 use PrivateFileManager;
 use Services;
 use SubmissionDAO;
-use TIBHannover\LatexConverter\Models\ArticleGalley;
+use TIBHannover\LatexConverter\Models\ArticleSubmissionFile;
 use TIBHannover\LatexConverter\Models\Cleanup;
 
 class Convert
@@ -295,14 +295,14 @@ class Convert
             if ($file !== $this->mainFileName && $file !== $fileToAdd)
                 $this->dependentFileNames[] = $file;
 
-        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
+        $articleSubmissionFile = new ArticleSubmissionFile($this->request, $this->submissionId, $this->submissionFile,
             $this->workingDirAbsolutePath, $this->submissionFilesRelativeDir, $fileToAdd,
             $this->dependentFileNames);
 
-        if (!$articleGalley->addMainFile()) return false;
+        if (!$articleSubmissionFile->addMainFile()) return false;
 
         if (!empty($this->dependentFileNames))
-            if (!$articleGalley->addDependentFiles()) return false;
+            if (!$articleSubmissionFile->addDependentFiles()) return false;
 
         return true;
     }

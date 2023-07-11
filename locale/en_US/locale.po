@@ -38,11 +38,8 @@ msgstr "Couldn't open file, the file might be corrupt. Please upload file again.
 msgid "plugins.generic.latexConverter.notification.noValidZipFile"
 msgstr "This file is not a valid ZIP file"
 
-msgid "plugins.generic.latexConverter.notification.noTexFileFound"
-msgstr "No LaTex file found in ZIP file. Please make sure you include a Tex file."
-
-msgid "plugins.generic.latexConverter.notification.multipleTexFilesFound"
-msgstr "Multiple Tex files found in ZIP file. Please make sure you include a \"{$value}\" file in the archive."
+msgid "plugins.generic.latexConverter.notification.noFileSelected"
+msgstr "You have not selected a file as the main file. Please try again"
 
 msgid "plugins.generic.latexConverter.notification.extracted"
 msgstr "File extraction successful"
@@ -51,4 +48,15 @@ msgid "plugins.generic.latexConverter.executable.notFound"
 msgstr "Configured latex converter is unavailable"
 
 msgid "plugins.generic.latexConverter.executable.notConfigured"
-msgstr "Latex converter is  not configured"
+msgstr "Latex converter is not configured"
+
+msgid "plugins.generic.latexConverter.modal.extract.title"
+msgstr "Select main file"
+
+msgid "plugins.generic.latexConverter.modal.extract.label"
+msgstr "Please select a file"
+
+msgid "plugins.generic.latexConverter.modal.extract.button"
+msgstr "Extract and save"
+
+

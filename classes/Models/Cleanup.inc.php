@@ -25,6 +25,7 @@ class Cleanup
     public function removeDirectoryAndContentsRecursively($src): void
     {
         $dir = opendir($src);
+
         while (false !== ($file = readdir($dir))) {
             if (($file != '.') && ($file != '..')) {
                 $full = $src . '/' . $file;
@@ -35,7 +36,9 @@ class Cleanup
                 }
             }
         }
+
         closedir($dir);
+
         rmdir($src);
     }
 }

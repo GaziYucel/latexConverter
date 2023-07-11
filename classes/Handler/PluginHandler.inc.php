@@ -34,7 +34,7 @@ class PluginHandler extends Handler
      * List of methods allowed
      * @var array|string[]
      */
-    protected array $allowedMethods = ['extract', 'convert'];
+    protected array $allowedMethods = ['extractShow', 'extractExecute', 'convert'];
 
     function __construct()
     {
@@ -63,10 +63,33 @@ class PluginHandler extends Handler
      * @param $request
      * @return JSONMessage
      */
-    public function extract($params, $request): JSONMessage
+    public function extractShow($params, $request): JSONMessage
     {
         $action = new Extract($this->plugin, $request, $params);
-        return $action->execute();
+        $action->initData();
+        return new JSONMessage(true, $action->fetch($request));
+    }
+
+    /**
+     * Create galley form
+     * @param $params array
+     * @param $request
+     * @return JSONMessage JSON object
+     */
+    public function extractExecute($params, $request)
+    {
+        $action = new Extract($this->plugin, $request, $params);
+
+        $action->readInputData();
+
+        $action->execute();
+
+        return $request->redirectUrlJson($request->getDispatcher()->url($request, ROUTE_PAGE, null, 'workflow', 'access', null,
+            array(
+                'submissionId' => $request->getUserVar('submissionId'),
+                'stageId' => $request->getUserVar('stageId')
+            )
+        ));
     }
 
     /**

@@ -1,15 +1,15 @@
 <?php
 /**
- * @file plugins/generic/latexConverter/classes/Models/ArticleGalley.inc.php
+ * @file plugins/generic/latexConverter/classes/Models/ArticleSubmissionFile.inc.php
  *
  * Copyright (c) 2023+ TIB Hannover
  * Copyright (c) 2023+ Gazi Yucel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @class ArticleGalley
+ * @class ArticleSubmissionFile
  * @ingroup plugins_generic_latexconverter
  *
- * @brief ArticleGalley methods
+ * @brief ArticleSubmissionFile methods
  */
 
 namespace TIBHannover\LatexConverter\Models;
@@ -18,7 +18,7 @@ use NotificationManager;
 use Services;
 use SubmissionFileDAO;
 
-class ArticleGalley
+class ArticleSubmissionFile
 {
     /**
      * @var NotificationManager

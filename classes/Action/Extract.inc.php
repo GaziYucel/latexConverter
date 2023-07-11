@@ -11,29 +11,26 @@
  *
  * @brief Action Extract for the Handler
  *
- * Do the following depending on tex files found:
- *   count = 0 : do nothing
- *   count = 1 : make main file and others dependent files
- *   count > 1 : make 'main.tex' mail file others dependent files
- *   count > 1 : if no 'main.tex' found, do nothing
- *
  */
 
 namespace TIBHannover\LatexConverter\Action;
 
 import('lib.pkp.classes.file.PrivateFileManager');
 import('lib.pkp.classes.submission.GenreDAO');
+import('lib.pkp.classes.form.Form');
 
+use Form;
 use JSONMessage;
 use NotificationManager;
 use PrivateFileManager;
 use Services;
 use SubmissionDAO;
+use TemplateManager;
 use ZipArchive;
-use TIBHannover\LatexConverter\Models\ArticleGalley;
+use TIBHannover\LatexConverter\Models\ArticleSubmissionFile;
 use TIBHannover\LatexConverter\Models\Cleanup;
 
-class Extract
+class Extract extends Form
 {
     /**
      * @var object LatexConverterPlugin
@@ -115,6 +112,12 @@ class Extract
      */
     protected array $dependentFileNames = [];
 
+    /**
+     * Name used for id in form
+     * @var string
+     */
+    protected string $latexConverterSelectedFilenameKey = 'latexConverter_SelectedFilename';
+
     function __construct($plugin, $request, $params)
     {
         $this->timeStamp = date('Ymd_His');
@@ -137,19 +140,66 @@ class Extract
         $this->archiveAbsoluteFilePath = $this->fileManager->getBasePath() . DIRECTORY_SEPARATOR .
             $this->submissionFile->getData('path');
 
-        $this->archiveExtractedAbsoluteDirPath =
-            tempnam(sys_get_temp_dir(), LATEX_CONVERTER_PLUGIN_NAME . '_') . '_' . $this->timeStamp;
+        $this->archiveExtractedAbsoluteDirPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
+            LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
+        // tempnam(sys_get_temp_dir(), LATEX_CONVERTER_PLUGIN_NAME . '_') . '_' . $this->timeStamp;
+
+        error_log($this->archiveExtractedAbsoluteDirPath);
 
         $this->submissionFilesRelativeDir = Services::get('submissionFile')->getSubmissionDir(
             $this->submission->getData('contextId'), $this->submissionId);
+
+        parent::__construct($plugin->getTemplateResource('extract.tpl'));
     }
 
     /**
-     * Main entry point
-     * @return JSONMessage
+     * Display the form.
+     * @param $request
+     * @param $template
+     * @param bool $display
+     * @return string
      */
-    public function execute(): JSONMessage
+    function fetch($request, $template = null, $display = false): string
     {
+        $templateMgr = TemplateManager::getManager($request);
+
+        $templateMgr->assign([
+            'latexConverterSelectedFilenameKey' => $this->latexConverterSelectedFilenameKey,
+            'filenames' => $this->getZipContentTexFilesFirst(),
+            'submissionId' => $this->submissionId,
+            'stageId' => $request->getUserVar('stageId'),
+            'fileStage' => $request->getUserVar('fileStage'),
+            'submissionFileId' => $this->submissionFileId,
+            'archiveType' => $this->request->getUserVar("archiveType")
+        ]);
+
+        return parent::fetch($request, $template, $display);
+    }
+
+    /**
+     * Assign form data to user-submitted data.
+     */
+    function readInputData(): void
+    {
+        $this->readUserVars([$this->latexConverterSelectedFilenameKey]);
+    }
+
+    /**
+     * Execute the forms action
+     * @param ...$functionArgs
+     */
+    public function execute(...$functionArgs): mixed
+    {
+        $this->mainFileName = $this->getData($this->latexConverterSelectedFilenameKey);
+
+        // no main file found, notify and return
+        if (empty($this->mainFileName)) {
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.noFileSelected')));
+            return $this->defaultResponse();
+        }
+
         // extract zip, return if false
         if (!$this->extractZip()) return $this->defaultResponse();
 
@@ -157,19 +207,48 @@ class Extract
         if (!$this->processArchiveContent()) return $this->defaultResponse();
 
         // add main file
-        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
+        $articleSubmissionFile = new ArticleSubmissionFile($this->request, $this->submissionId, $this->submissionFile,
             $this->archiveExtractedAbsoluteDirPath, $this->submissionFilesRelativeDir, $this->mainFileName,
             $this->dependentFileNames);
 
         if (!empty($this->mainFileName))
-            if (!$articleGalley->addMainFile()) return $this->defaultResponse();
+            if (!$articleSubmissionFile->addMainFile()) return $this->defaultResponse();
 
         // add dependent files
         if (!empty($this->dependentFileNames))
-            if (!$articleGalley->addDependentFiles()) return $this->defaultResponse();
+            if (!$articleSubmissionFile->addDependentFiles()) return $this->defaultResponse();
 
         // all went well, return ok
         return $this->defaultResponse(true);
+    }
+
+    /**
+     * Get list of filenames of zip file
+     * @return array
+     */
+    private function getZipContentTexFilesFirst(): array
+    {
+        $texFiles = [];
+
+        $otherFiles = [];
+
+        $zip = new ZipArchive();
+
+        $zip->open($this->archiveAbsoluteFilePath);
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            $fileName = basename($stat['name']);
+            if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), LATEX_CONVERTER_TEX_EXTENSIONS)) {
+                $texFiles[] = $fileName;
+            } elseif (!empty(pathinfo($fileName, PATHINFO_EXTENSION))) {
+                $otherFiles[] = $fileName;
+            }
+        }
+
+        $zip->close();
+
+        return array_merge($texFiles, $otherFiles);
     }
 
     /**
@@ -215,40 +294,11 @@ class Extract
      */
     private function processArchiveContent(): bool
     {
-        $texFiles = [];
-
         $archiveContent = array_diff(scandir($this->archiveExtractedAbsoluteDirPath), ['..', '.']);
 
         foreach ($archiveContent as $index => $fileName) {
-            if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), LATEX_CONVERTER_TEX_EXTENSIONS)) {
-                $texFiles[] = $fileName;
-            } elseif (!empty(pathinfo($fileName, PATHINFO_EXTENSION))) {
+            if($fileName !== $this->mainFileName){
                 $this->dependentFileNames[] = $fileName;
-            }
-        }
-
-        // decide what to do according to tex files found
-        if (count($texFiles) === 0) {
-            $this->notificationManager->createTrivialNotification(
-                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
-                array('contents' => __('plugins.generic.latexConverter.notification.noTexFileFound')));
-            return false;
-        } else {
-            foreach ($texFiles as $fileName) {
-                if (pathinfo($fileName, PATHINFO_BASENAME) === LATEX_CONVERTER_MAIN_FILENAME) {
-                    $this->mainFileName = $fileName;
-                } else {
-                    $this->dependentFileNames[] = $fileName;
-                }
-            }
-
-            // no main file found, notify and return 
-            if (empty($this->mainFileName)) {
-                $this->notificationManager->createTrivialNotification(
-                    $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
-                    array('contents' => __('plugins.generic.latexConverter.notification.multipleTexFilesFound',
-                        ['value' => LATEX_CONVERTER_MAIN_FILENAME])));
-                return false;
             }
         }
 
