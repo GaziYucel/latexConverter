@@ -142,9 +142,6 @@ class Extract extends Form
 
         $this->archiveExtractedAbsoluteDirPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
             LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
-        // tempnam(sys_get_temp_dir(), LATEX_CONVERTER_PLUGIN_NAME . '_') . '_' . $this->timeStamp;
-
-        error_log($this->archiveExtractedAbsoluteDirPath);
 
         $this->submissionFilesRelativeDir = Services::get('submissionFile')->getSubmissionDir(
             $this->submission->getData('contextId'), $this->submissionId);

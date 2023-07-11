@@ -17,7 +17,7 @@
 
 <form class="pkp_form"
       id="latexConverter_extractForm" method="post"
-      action="{url op="extractAfterFileSelected"
+      action="{url op="extractExecute"
             submissionId=$submissionId stageId=$stageId fileStage=$fileStage
             submissionFileId=$submissionFileId archiveType=$archiveType}">
 
