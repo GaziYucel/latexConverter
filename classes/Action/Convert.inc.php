@@ -127,6 +127,12 @@ class Convert
      */
     protected string $logFile = '';
 
+    /**
+     * Absolute path to the latex executable
+     * @var string
+     */
+    protected string $latexExe = '';
+
     function __construct($plugin, $request, $args)
     {
         $this->timeStamp = date('Ymd_His');
@@ -159,6 +165,9 @@ class Convert
             $this->submission->getData('contextId'), $this->submissionId);
 
         $this->ojsFilesAbsoluteBaseDir = Config::getVar('files', 'files_dir');
+
+        $this->latexExe = $this->plugin->getSetting($this->request->getContext()->getId(),
+            LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
     }
 
     /**
@@ -167,6 +176,14 @@ class Convert
      */
     public function process(): JSONMessage
     {
+        // check if latex executable path configured
+        if (empty($this->latexExe)) {
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.executable.notConfigured')));
+            return $this->defaultResponse();
+        }
+
         // create working directory
         if (!mkdir($this->workingDirAbsolutePath, 0777, true)) {
             $this->notificationManager->createTrivialNotification(
@@ -263,20 +280,7 @@ class Convert
      */
     private function convertToPdf(): bool
     {
-        $pdfLatex = $this->plugin->getSetting(
-            $this->request->getContext()->getId(),
-            LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
-
-        if (empty($pdfLatex)) {
-            $this->notificationManager->createTrivialNotification(
-                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
-                array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
-            return false;
-        }
-
-        $pdfLatex .= ' -no-shell-escape -interaction=nonstopmode';
-
-        shell_exec("cd $this->workingDirAbsolutePath && $pdfLatex $this->mainFileName 2>&1");
+        shell_exec("cd $this->workingDirAbsolutePath && $this->latexExe -no-shell-escape -interaction=nonstopmode $this->mainFileName 2>&1");
 
         return true;
     }
