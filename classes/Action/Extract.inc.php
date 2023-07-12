@@ -11,29 +11,26 @@
  *
  * @brief Action Extract for the Handler
  *
- * Do the following depending on tex files found:
- *   count = 0 : do nothing
- *   count = 1 : make main file and others dependent files
- *   count > 1 : make 'main.tex' mail file others dependent files
- *   count > 1 : if no 'main.tex' found, do nothing
- *
  */
 
 namespace TIBHannover\LatexConverter\Action;
 
 import('lib.pkp.classes.file.PrivateFileManager');
 import('lib.pkp.classes.submission.GenreDAO');
+import('lib.pkp.classes.form.Form');
 
+use Form;
 use JSONMessage;
 use NotificationManager;
 use PrivateFileManager;
 use Services;
 use SubmissionDAO;
+use TemplateManager;
 use ZipArchive;
-use TIBHannover\LatexConverter\Models\ArticleGalley;
+use TIBHannover\LatexConverter\Models\ArticleSubmissionFile;
 use TIBHannover\LatexConverter\Models\Cleanup;
 
-class Extract
+class Extract extends Form
 {
     /**
      * @var object LatexConverterPlugin
@@ -85,14 +82,14 @@ class Extract
      * e.g. /var/www/ojs_files/journals/1/articles/51/648b243110d7e.zip
      * @var string
      */
-    protected string $archiveAbsoluteFilePath;
+    protected string $archiveFileAbsolutePath;
 
     /**
      * Absolute path to the directory with the extracted content of archive
      * e.g. /var/tmp/648b243110d7e_zip_extracted
      * @var string
      */
-    protected string $archiveExtractedAbsoluteDirPath;
+    protected string $workingDirAbsolutePath;
 
     /**
      * Path to directory for files of this submission
@@ -115,7 +112,13 @@ class Extract
      */
     protected array $dependentFileNames = [];
 
-    function __construct($plugin, $request, $params)
+    /**
+     * Name used for id in form
+     * @var string
+     */
+    protected string $latexConverterSelectedFilenameKey = 'latexConverter_SelectedFilename';
+
+    function __construct($plugin, $request, $args)
     {
         $this->timeStamp = date('Ymd_His');
 
@@ -134,42 +137,124 @@ class Extract
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
         $this->submission = $submissionDao->getById($this->submissionId);
 
-        $this->archiveAbsoluteFilePath = $this->fileManager->getBasePath() . DIRECTORY_SEPARATOR .
+        $this->archiveFileAbsolutePath = $this->fileManager->getBasePath() . DIRECTORY_SEPARATOR .
             $this->submissionFile->getData('path');
 
-        $this->archiveExtractedAbsoluteDirPath =
-            tempnam(sys_get_temp_dir(), LATEX_CONVERTER_PLUGIN_NAME . '_') . '_' . $this->timeStamp;
+        $this->workingDirAbsolutePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
+            LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
 
         $this->submissionFilesRelativeDir = Services::get('submissionFile')->getSubmissionDir(
             $this->submission->getData('contextId'), $this->submissionId);
+
+        parent::__construct($plugin->getTemplateResource('extract.tpl'));
     }
 
     /**
-     * Main entry point
+     * Display the form.
+     * @param $request
+     * @param $template
+     * @param bool $display
+     * @return string
+     */
+    function fetch($request, $template = null, $display = false): string
+    {
+        $templateMgr = TemplateManager::getManager($request);
+
+        $templateMgr->assign([
+            'latexConverterSelectedFilenameKey' => $this->latexConverterSelectedFilenameKey,
+            'filenames' => $this->getZipContentTexFilesFirst(),
+            'submissionId' => $this->submissionId,
+            'stageId' => $request->getUserVar('stageId'),
+            'fileStage' => $request->getUserVar('fileStage'),
+            'submissionFileId' => $this->submissionFileId,
+            'archiveType' => $this->request->getUserVar("archiveType")
+        ]);
+
+        return parent::fetch($request, $template, $display);
+    }
+
+    /**
+     * Assign form data to user-submitted data.
+     */
+    function readInputData(): void
+    {
+        $this->readUserVars([$this->latexConverterSelectedFilenameKey]);
+    }
+
+    /**
+     * Process after selecting main file
      * @return JSONMessage
      */
-    public function execute(): JSONMessage
+    public function process(): JSONMessage
     {
+        $this->mainFileName = $this->getData($this->latexConverterSelectedFilenameKey);
+
+        // no main file found, notify and return
+        if (empty($this->mainFileName)) {
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.notification.noFileSelected')));
+            return $this->defaultResponse();
+        }
+
         // extract zip, return if false
         if (!$this->extractZip()) return $this->defaultResponse();
 
-        // iterate through archive content: list and decide what to do
-        if (!$this->processArchiveContent()) return $this->defaultResponse();
+        // get all dependent files
+        foreach (array_diff(scandir($this->workingDirAbsolutePath), ['..', '.']) as $index => $fileName) {
+            if($fileName !== $this->mainFileName){
+                $this->dependentFileNames[] = $fileName;
+            }
+        }
 
         // add main file
-        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
-            $this->archiveExtractedAbsoluteDirPath, $this->submissionFilesRelativeDir, $this->mainFileName,
+        $articleSubmissionFile = new ArticleSubmissionFile(
+            $this->request,
+            $this->submissionId,
+            $this->submissionFile,
+            $this->workingDirAbsolutePath,
+            $this->submissionFilesRelativeDir,
+            $this->mainFileName,
             $this->dependentFileNames);
 
         if (!empty($this->mainFileName))
-            if (!$articleGalley->addMainFile()) return $this->defaultResponse();
+            if (!$articleSubmissionFile->addMainFile()) return $this->defaultResponse();
 
         // add dependent files
         if (!empty($this->dependentFileNames))
-            if (!$articleGalley->addDependentFiles()) return $this->defaultResponse();
+            if (!$articleSubmissionFile->addDependentFiles()) return $this->defaultResponse();
 
         // all went well, return ok
         return $this->defaultResponse(true);
+    }
+
+    /**
+     * Get list of filenames of zip file
+     * @return array
+     */
+    private function getZipContentTexFilesFirst(): array
+    {
+        $texFiles = [];
+
+        $otherFiles = [];
+
+        $zip = new ZipArchive();
+
+        $zip->open($this->archiveFileAbsolutePath);
+
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $stat = $zip->statIndex($i);
+            $fileName = basename($stat['name']);
+            if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), LATEX_CONVERTER_TEX_EXTENSIONS)) {
+                $texFiles[] = $fileName;
+            } elseif (!empty(pathinfo($fileName, PATHINFO_EXTENSION))) {
+                $otherFiles[] = $fileName;
+            }
+        }
+
+        $zip->close();
+
+        return array_merge($texFiles, $otherFiles);
     }
 
     /**
@@ -189,68 +274,20 @@ class Extract
 
         $zip = new ZipArchive();
 
-        if (!$zip->open($this->archiveAbsoluteFilePath)) {
+        if (!$zip->open($this->archiveFileAbsolutePath)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.errorOpeningFile')));
             return false;
         }
 
-        if (!mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true)) {
+        if (!mkdir($this->workingDirAbsolutePath, 0777, true)) {
             return false;
         }
 
-        $zip->extractTo($this->archiveExtractedAbsoluteDirPath);
+        $zip->extractTo($this->workingDirAbsolutePath);
 
         $zip->close();
-
-        return true;
-    }
-
-    /**
-     * Iterate through directory and get found files
-     *     - $this->mainFile holds the main tex file
-     *     - $this->dependentFiles is an array of all other files
-     * @return bool
-     */
-    private function processArchiveContent(): bool
-    {
-        $texFiles = [];
-
-        $archiveContent = array_diff(scandir($this->archiveExtractedAbsoluteDirPath), ['..', '.']);
-
-        foreach ($archiveContent as $index => $fileName) {
-            if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), LATEX_CONVERTER_TEX_EXTENSIONS)) {
-                $texFiles[] = $fileName;
-            } elseif (!empty(pathinfo($fileName, PATHINFO_EXTENSION))) {
-                $this->dependentFileNames[] = $fileName;
-            }
-        }
-
-        // decide what to do according to tex files found
-        if (count($texFiles) === 0) {
-            $this->notificationManager->createTrivialNotification(
-                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
-                array('contents' => __('plugins.generic.latexConverter.notification.noTexFileFound')));
-            return false;
-        } else {
-            foreach ($texFiles as $fileName) {
-                if (pathinfo($fileName, PATHINFO_BASENAME) === LATEX_CONVERTER_MAIN_FILENAME) {
-                    $this->mainFileName = $fileName;
-                } else {
-                    $this->dependentFileNames[] = $fileName;
-                }
-            }
-
-            // no main file found, notify and return 
-            if (empty($this->mainFileName)) {
-                $this->notificationManager->createTrivialNotification(
-                    $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
-                    array('contents' => __('plugins.generic.latexConverter.notification.multipleTexFilesFound',
-                        ['value' => LATEX_CONVERTER_MAIN_FILENAME])));
-                return false;
-            }
-        }
 
         return true;
     }
@@ -268,9 +305,9 @@ class Extract
 
     function __destruct()
     {
-        if (file_exists($this->archiveExtractedAbsoluteDirPath)) {
+        if (file_exists($this->workingDirAbsolutePath)) {
             $cleanup = new Cleanup();
-            $cleanup->removeDirectoryAndContentsRecursively($this->archiveExtractedAbsoluteDirPath);
+            $cleanup->removeDirectoryAndContentsRecursively($this->workingDirAbsolutePath);
         }
     }
 }

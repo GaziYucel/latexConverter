@@ -22,7 +22,7 @@ use NotificationManager;
 use PrivateFileManager;
 use Services;
 use SubmissionDAO;
-use TIBHannover\LatexConverter\Models\ArticleGalley;
+use TIBHannover\LatexConverter\Models\ArticleSubmissionFile;
 use TIBHannover\LatexConverter\Models\Cleanup;
 
 class Convert
@@ -127,7 +127,13 @@ class Convert
      */
     protected string $logFile = '';
 
-    function __construct($plugin, $request, $params)
+    /**
+     * Absolute path to the latex executable
+     * @var string
+     */
+    protected string $latexExe = '';
+
+    function __construct($plugin, $request, $args)
     {
         $this->timeStamp = date('Ymd_His');
 
@@ -152,21 +158,32 @@ class Convert
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
         $this->submission = $submissionDao->getById($this->submissionId);
 
-        $this->workingDirAbsolutePath =
-            tempnam(sys_get_temp_dir(), LATEX_CONVERTER_PLUGIN_NAME . '_') . '_' . $this->timeStamp;
+        $this->workingDirAbsolutePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
+            LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
 
         $this->submissionFilesRelativeDir = Services::get('submissionFile')->getSubmissionDir(
             $this->submission->getData('contextId'), $this->submissionId);
 
         $this->ojsFilesAbsoluteBaseDir = Config::getVar('files', 'files_dir');
+
+        $this->latexExe = $this->plugin->getSetting($this->request->getContext()->getId(),
+            LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
     }
 
     /**
      * Main entry point
      * @return JSONMessage
      */
-    public function execute(): JSONMessage
+    public function process(): JSONMessage
     {
+        // check if latex executable path configured
+        if (empty($this->latexExe)) {
+            $this->notificationManager->createTrivialNotification(
+                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
+                array('contents' => __('plugins.generic.latexConverter.executable.notConfigured')));
+            return $this->defaultResponse();
+        }
+
         // create working directory
         if (!mkdir($this->workingDirAbsolutePath, 0777, true)) {
             $this->notificationManager->createTrivialNotification(
@@ -263,20 +280,7 @@ class Convert
      */
     private function convertToPdf(): bool
     {
-        $pdfLatex = $this->plugin->getSetting(
-            $this->request->getContext()->getId(),
-            LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
-
-        if (empty($pdfLatex)) {
-            $this->notificationManager->createTrivialNotification(
-                $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
-                array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
-            return false;
-        }
-
-        $pdfLatex .= ' -no-shell-escape -interaction=nonstopmode';
-
-        shell_exec("cd $this->workingDirAbsolutePath && $pdfLatex $this->mainFileName 2>&1");
+        shell_exec("cd $this->workingDirAbsolutePath && $this->latexExe -no-shell-escape -interaction=nonstopmode $this->mainFileName 2>&1");
 
         return true;
     }
@@ -295,14 +299,19 @@ class Convert
             if ($file !== $this->mainFileName && $file !== $fileToAdd)
                 $this->dependentFileNames[] = $file;
 
-        $articleGalley = new ArticleGalley($this->request, $this->submissionId, $this->submissionFile,
-            $this->workingDirAbsolutePath, $this->submissionFilesRelativeDir, $fileToAdd,
+        $articleSubmissionFile = new ArticleSubmissionFile(
+            $this->request,
+            $this->submissionId,
+            $this->submissionFile,
+            $this->workingDirAbsolutePath,
+            $this->submissionFilesRelativeDir,
+            $fileToAdd,
             $this->dependentFileNames);
 
-        if (!$articleGalley->addMainFile()) return false;
+        if (!$articleSubmissionFile->addMainFile()) return false;
 
         if (!empty($this->dependentFileNames))
-            if (!$articleGalley->addDependentFiles()) return false;
+            if (!$articleSubmissionFile->addDependentFiles()) return false;
 
         return true;
     }

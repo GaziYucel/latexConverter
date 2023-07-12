@@ -62,7 +62,7 @@ class LatexConverterPlugin extends GenericPlugin
     /**
      * Adds additional links to submission files grid row
      * @param $hookName string The name of the invoked hook
-     * @param $args array Hook parameters [PKPTemplateManager, $template, $cache_id, $compile_id, &$result]
+     * @param $args array Hook arguments [PKPTemplateManager, $template, $cache_id, $compile_id, &$result]
      * @return void
      */
     public function callbackTemplateFetch(string $hookName, array $args): void
@@ -71,8 +71,8 @@ class LatexConverterPlugin extends GenericPlugin
         $dispatcher = $request->getDispatcher();
 
         $templateMgr = $args[0];
-        $resourceName = $args[1];
-        if ($resourceName == 'controllers/grid/gridRow.tpl') {
+        $template = $args[1];
+        if ($template == 'controllers/grid/gridRow.tpl') {
             $row = $templateMgr->getTemplateVars('row');
             $data = $row->getData();
             if (is_array($data) && (isset($data['submissionFile']))) {
@@ -109,16 +109,17 @@ class LatexConverterPlugin extends GenericPlugin
                     // only show link if file is zip
                     if (strtolower($fileExtension) == LATEX_CONVERTER_ZIP_FILE_TYPE) {
 
-                        $path = $dispatcher->url($request, ROUTE_PAGE, null,
-                            'latexConverter', 'extract', null, $actionArgs);
+                        $path = $dispatcher->url(
+                            $request, ROUTE_PAGE, null,
+                            'latexConverter', 'extractShow', null, $actionArgs);
 
-                        import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
+                        import('lib.pkp.classes.linkAction.request.OpenWindowAction');
 
                         $row->addAction(new LinkAction(
                             'latexconverter_extract_zip',
-                            new PostAndRedirectAction($path, $pathRedirect),
-                            __('plugins.generic.latexConverter.button.extract')
-                        ));
+                            new AjaxModal($path, __('plugins.generic.latexConverter.modal.extract.title')),
+                            __('plugins.generic.latexConverter.button.extract'), null));
+
                     } // only show link if file is tex and is not dependent file (assocId is null)
                     elseif (strtolower($fileExtension) == LATEX_CONVERTER_LATEX_FILE_TYPE
                         && empty($submissionFile->getData('assocId'))) {
@@ -131,7 +132,7 @@ class LatexConverterPlugin extends GenericPlugin
                         $row->addAction(new LinkAction(
                             'latexconverter_convert_to_pdf',
                             new PostAndRedirectAction($path, $pathRedirect),
-                            __('plugins.generic.latexConverter.button.convert')
+                            $this->getConvertButton()
                         ));
                     }
                 }
@@ -142,7 +143,7 @@ class LatexConverterPlugin extends GenericPlugin
     /**
      * Execute PluginHandler
      * @param $hookName string
-     * @param $args array Hook parameters [&$page, &$op, &$sourceFile]
+     * @param $args array Hook arguments [&$page, &$op, &$sourceFile]
      * @return bool
      */
     public function callbackLoadHandler(string $hookName, array $args): bool
@@ -151,7 +152,8 @@ class LatexConverterPlugin extends GenericPlugin
         $op = $args[1];
 
         switch ("$page/$op") {
-            case "latexConverter/extract":
+            case "latexConverter/extractShow":
+            case "latexConverter/extractExecute":
             case "latexConverter/convert":
                 define('HANDLER_CLASS', 'TIBHannover\LatexConverter\Handler\PluginHandler');
                 return true;
@@ -165,7 +167,7 @@ class LatexConverterPlugin extends GenericPlugin
     /**
      * Add mimetypes which support dependent files
      * @param $hookName string
-     * @param $args array Hook parameters [&$result, $submissionFile]
+     * @param $args array Hook arguments [&$result, $submissionFile]
      * @return void
      */
     public function callbackSupportsDependentFiles(string $hookName, array $args): void
@@ -222,6 +224,7 @@ class LatexConverterPlugin extends GenericPlugin
     public function manage($args, $request): \JSONMessage
     {
         $context = $request->getContext();
+
         switch ($request->getUserVar('verb')) {
             case 'settings':
                 // Load the custom form
@@ -243,6 +246,7 @@ class LatexConverterPlugin extends GenericPlugin
             default:
                 break;
         }
+
         return parent::manage($args, $request);
     }
 
@@ -264,27 +268,37 @@ class LatexConverterPlugin extends GenericPlugin
         return __('plugins.generic.latexConverter.description');
     }
 
-    public static function logFilePath()
+    /**
+     * Overrides parent getSetting
+     * @param $contextId
+     * @param $name
+     * @return mixed|null
+     */
+    public function getSetting($contextId, $name): mixed
     {
-        return Config::getVar('files', 'files_dir') . '/latexConverter.log';
+        switch ($name) {
+            case LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE:
+                $config_value = Config::getVar('latex', 'latexExe');
+                break;
+            default:
+                return parent::getSetting($contextId, $name);
+        }
+
+        return $config_value ?: parent::getSetting($contextId, $name);
     }
 
     /**
-     * Write a message with specified level to log
-     *
-     * @param  $message string Message to write
-     * @param  $level   string Error level to add to message
-     * @return void
+     * Converter button depending on the latex executable status
+     * @return  string
      */
-    protected static function writeLog($message, $level)
+    public function getConvertButton(): string
     {
-        $fineStamp = date('Y-m-d H:i:s') . substr(microtime(), 1, 4);
-        error_log("$fineStamp $level $message\n", 3, self::logFilePath());
+        $latexExe = $this->getSetting($this->getRequest()->getContext()->getId(), LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
+        if (strlen($latexExe) == 0) {
+            return __('plugins.generic.latexConverter.executable.notConfigured');
+        } elseif (!is_executable($latexExe)) {
+            return __('plugins.generic.latexConverter.executable.notFound');
+        };
+        return __('plugins.generic.latexConverter.button.convert');
     }
-
-    public function logError($message)
-    {
-        self::writeLog($message, 'ERROR');
-    }
-
 }

@@ -11,6 +11,7 @@ return array(
     'TIBHannover\\LatexConverter\\Action\\Extract' => $baseDir . '/classes/Action/Extract.inc.php',
     'TIBHannover\\LatexConverter\\Components\\Forms\\SettingsForm' => $baseDir . '/classes/Components/Forms/SettingsForm.inc.php',
     'TIBHannover\\LatexConverter\\Handler\\PluginHandler' => $baseDir . '/classes/Handler/PluginHandler.inc.php',
-    'TIBHannover\\LatexConverter\\Models\\ArticleGalley' => $baseDir . '/classes/Models/ArticleGalley.inc.php',
+    'TIBHannover\\LatexConverter\\Models\\ArticleSubmissionFile' => $baseDir . '/classes/Models/ArticleSubmissionFile.inc.php',
     'TIBHannover\\LatexConverter\\Models\\Cleanup' => $baseDir . '/classes/Models/Cleanup.inc.php',
+    'TIBHannover\\LatexConverter\\Models\\Log' => $baseDir . '/classes/Models/Log.inc.php',
 );
