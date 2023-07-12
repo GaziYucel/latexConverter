@@ -62,7 +62,7 @@ class LatexConverterPlugin extends GenericPlugin
     /**
      * Adds additional links to submission files grid row
      * @param $hookName string The name of the invoked hook
-     * @param $args array Hook parameters [PKPTemplateManager, $template, $cache_id, $compile_id, &$result]
+     * @param $args array Hook arguments [PKPTemplateManager, $template, $cache_id, $compile_id, &$result]
      * @return void
      */
     public function callbackTemplateFetch(string $hookName, array $args): void
@@ -71,8 +71,8 @@ class LatexConverterPlugin extends GenericPlugin
         $dispatcher = $request->getDispatcher();
 
         $templateMgr = $args[0];
-        $resourceName = $args[1];
-        if ($resourceName == 'controllers/grid/gridRow.tpl') {
+        $template = $args[1];
+        if ($template == 'controllers/grid/gridRow.tpl') {
             $row = $templateMgr->getTemplateVars('row');
             $data = $row->getData();
             if (is_array($data) && (isset($data['submissionFile']))) {
@@ -143,7 +143,7 @@ class LatexConverterPlugin extends GenericPlugin
     /**
      * Execute PluginHandler
      * @param $hookName string
-     * @param $args array Hook parameters [&$page, &$op, &$sourceFile]
+     * @param $args array Hook arguments [&$page, &$op, &$sourceFile]
      * @return bool
      */
     public function callbackLoadHandler(string $hookName, array $args): bool
@@ -167,7 +167,7 @@ class LatexConverterPlugin extends GenericPlugin
     /**
      * Add mimetypes which support dependent files
      * @param $hookName string
-     * @param $args array Hook parameters [&$result, $submissionFile]
+     * @param $args array Hook arguments [&$result, $submissionFile]
      * @return void
      */
     public function callbackSupportsDependentFiles(string $hookName, array $args): void

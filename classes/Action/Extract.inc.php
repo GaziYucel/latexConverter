@@ -82,14 +82,14 @@ class Extract extends Form
      * e.g. /var/www/ojs_files/journals/1/articles/51/648b243110d7e.zip
      * @var string
      */
-    protected string $archiveAbsoluteFilePath;
+    protected string $archiveFileAbsolutePath;
 
     /**
      * Absolute path to the directory with the extracted content of archive
      * e.g. /var/tmp/648b243110d7e_zip_extracted
      * @var string
      */
-    protected string $archiveExtractedAbsoluteDirPath;
+    protected string $workingDirAbsolutePath;
 
     /**
      * Path to directory for files of this submission
@@ -118,7 +118,7 @@ class Extract extends Form
      */
     protected string $latexConverterSelectedFilenameKey = 'latexConverter_SelectedFilename';
 
-    function __construct($plugin, $request, $params)
+    function __construct($plugin, $request, $args)
     {
         $this->timeStamp = date('Ymd_His');
 
@@ -137,10 +137,10 @@ class Extract extends Form
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
         $this->submission = $submissionDao->getById($this->submissionId);
 
-        $this->archiveAbsoluteFilePath = $this->fileManager->getBasePath() . DIRECTORY_SEPARATOR .
+        $this->archiveFileAbsolutePath = $this->fileManager->getBasePath() . DIRECTORY_SEPARATOR .
             $this->submissionFile->getData('path');
 
-        $this->archiveExtractedAbsoluteDirPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
+        $this->workingDirAbsolutePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
             LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
 
         $this->submissionFilesRelativeDir = Services::get('submissionFile')->getSubmissionDir(
@@ -182,10 +182,10 @@ class Extract extends Form
     }
 
     /**
-     * Execute the forms action
-     * @param ...$functionArgs
+     * Process after selecting main file
+     * @return JSONMessage
      */
-    public function execute(...$functionArgs): mixed
+    public function process(): JSONMessage
     {
         $this->mainFileName = $this->getData($this->latexConverterSelectedFilenameKey);
 
@@ -200,12 +200,21 @@ class Extract extends Form
         // extract zip, return if false
         if (!$this->extractZip()) return $this->defaultResponse();
 
-        // iterate through archive content: list and decide what to do
-        if (!$this->processArchiveContent()) return $this->defaultResponse();
+        // get all dependent files
+        foreach (array_diff(scandir($this->workingDirAbsolutePath), ['..', '.']) as $index => $fileName) {
+            if($fileName !== $this->mainFileName){
+                $this->dependentFileNames[] = $fileName;
+            }
+        }
 
         // add main file
-        $articleSubmissionFile = new ArticleSubmissionFile($this->request, $this->submissionId, $this->submissionFile,
-            $this->archiveExtractedAbsoluteDirPath, $this->submissionFilesRelativeDir, $this->mainFileName,
+        $articleSubmissionFile = new ArticleSubmissionFile(
+            $this->request,
+            $this->submissionId,
+            $this->submissionFile,
+            $this->workingDirAbsolutePath,
+            $this->submissionFilesRelativeDir,
+            $this->mainFileName,
             $this->dependentFileNames);
 
         if (!empty($this->mainFileName))
@@ -231,7 +240,7 @@ class Extract extends Form
 
         $zip = new ZipArchive();
 
-        $zip->open($this->archiveAbsoluteFilePath);
+        $zip->open($this->archiveFileAbsolutePath);
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $stat = $zip->statIndex($i);
@@ -265,39 +274,20 @@ class Extract extends Form
 
         $zip = new ZipArchive();
 
-        if (!$zip->open($this->archiveAbsoluteFilePath)) {
+        if (!$zip->open($this->archiveFileAbsolutePath)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.errorOpeningFile')));
             return false;
         }
 
-        if (!mkdir($this->archiveExtractedAbsoluteDirPath, 0777, true)) {
+        if (!mkdir($this->workingDirAbsolutePath, 0777, true)) {
             return false;
         }
 
-        $zip->extractTo($this->archiveExtractedAbsoluteDirPath);
+        $zip->extractTo($this->workingDirAbsolutePath);
 
         $zip->close();
-
-        return true;
-    }
-
-    /**
-     * Iterate through directory and get found files
-     *     - $this->mainFile holds the main tex file
-     *     - $this->dependentFiles is an array of all other files
-     * @return bool
-     */
-    private function processArchiveContent(): bool
-    {
-        $archiveContent = array_diff(scandir($this->archiveExtractedAbsoluteDirPath), ['..', '.']);
-
-        foreach ($archiveContent as $index => $fileName) {
-            if($fileName !== $this->mainFileName){
-                $this->dependentFileNames[] = $fileName;
-            }
-        }
 
         return true;
     }
@@ -315,9 +305,9 @@ class Extract extends Form
 
     function __destruct()
     {
-        if (file_exists($this->archiveExtractedAbsoluteDirPath)) {
+        if (file_exists($this->workingDirAbsolutePath)) {
             $cleanup = new Cleanup();
-            $cleanup->removeDirectoryAndContentsRecursively($this->archiveExtractedAbsoluteDirPath);
+            $cleanup->removeDirectoryAndContentsRecursively($this->workingDirAbsolutePath);
         }
     }
 }

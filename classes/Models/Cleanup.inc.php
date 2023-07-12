@@ -19,16 +19,18 @@ class Cleanup
     /**
      * Delete folder and its contents recursively
      * @note Adapted from https://www.php.net/manual/de/function.rmdir.php#117354
-     * @param $src
-     * @return void
+     * @param $workingDirAbsolutePath string
+     * @return bool
      */
-    public function removeDirectoryAndContentsRecursively($src): void
+    public function removeDirectoryAndContentsRecursively(string $workingDirAbsolutePath): bool
     {
-        $dir = opendir($src);
+        if (!file_exists($workingDirAbsolutePath)) return false;
+
+        $dir = opendir($workingDirAbsolutePath);
 
         while (false !== ($file = readdir($dir))) {
             if (($file != '.') && ($file != '..')) {
-                $full = $src . '/' . $file;
+                $full = $workingDirAbsolutePath . DIRECTORY_SEPARATOR . $file;
                 if (is_dir($full)) {
                     $this->removeDirectoryAndContentsRecursively($full);
                 } else {
@@ -39,6 +41,8 @@ class Cleanup
 
         closedir($dir);
 
-        rmdir($src);
+        rmdir($workingDirAbsolutePath);
+
+        return true;
     }
 }

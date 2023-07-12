@@ -59,30 +59,32 @@ class PluginHandler extends Handler
 
     /**
      * Extracts file and adds to files list
-     * @param $params
+     * @param $args
      * @param $request
      * @return JSONMessage
      */
-    public function extractShow($params, $request): JSONMessage
+    public function extractShow($args, $request): JSONMessage
     {
-        $action = new Extract($this->plugin, $request, $params);
+        $action = new Extract($this->plugin, $request, $args);
+
         $action->initData();
+
         return new JSONMessage(true, $action->fetch($request));
     }
 
     /**
-     * Create galley form
-     * @param $params array
+     * Create article from selected main file
+     * @param $args
      * @param $request
      * @return JSONMessage JSON object
      */
-    public function extractExecute($params, $request)
+    public function extractExecute($args, $request): JSONMessage
     {
-        $action = new Extract($this->plugin, $request, $params);
+        $action = new Extract($this->plugin, $request, $args);
 
         $action->readInputData();
 
-        $action->execute();
+        $action->process();
 
         return $request->redirectUrlJson($request->getDispatcher()->url($request, ROUTE_PAGE, null, 'workflow', 'access', null,
             array(
@@ -94,13 +96,14 @@ class PluginHandler extends Handler
 
     /**
      * Converts LaTex file to pdf
-     * @param $params
+     * @param $args
      * @param $request
      * @return JSONMessage
      */
-    public function convert($params, $request): JSONMessage
+    public function convert($args, $request): JSONMessage
     {
-        $action = new Convert($this->plugin, $request, $params);
-        return $action->execute();
+        $action = new Convert($this->plugin, $request, $args);
+
+        return $action->process();
     }
 }

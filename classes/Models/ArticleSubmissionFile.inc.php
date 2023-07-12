@@ -80,7 +80,7 @@ class ArticleSubmissionFile
      */
     protected array $dependentFileNames = [];
 
-    public function __construct($request, $submissionId, $submissionFile, $archiveExtractedAbsoluteDirPath,
+    public function __construct($request, $submissionId, $submissionFile, $workingDirAbsolutePath,
                                 $submissionFilesRelativeDir, $mainFileName, $dependentFiles)
     {
         $this->notificationManager = new NotificationManager();
@@ -92,7 +92,7 @@ class ArticleSubmissionFile
         $this->dependentFileNames = $dependentFiles;
 
         $this->submissionFilesRelativeDir = $submissionFilesRelativeDir;
-        $this->workingDirAbsolutePath = $archiveExtractedAbsoluteDirPath;
+        $this->workingDirAbsolutePath = $workingDirAbsolutePath;
     }
 
     /**

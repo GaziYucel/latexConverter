@@ -24,7 +24,7 @@ msgid "plugins.generic.latexConverter.settings.authorised_mime_types.label"
 msgstr "Allowed mimetypes. One mimetype per line, e.g. text/x-tex"
 
 msgid "plugins.generic.latexConverter.button.extract"
-msgstr "Extract LaTex from Zip"
+msgstr "Extract Archive"
 
 msgid "plugins.generic.latexConverter.button.convert"
 msgstr "Convert LaTex to Pdf"
@@ -58,5 +58,4 @@ msgstr "Please select a file"
 
 msgid "plugins.generic.latexConverter.modal.extract.button"
 msgstr "Extract and save"
-
 
