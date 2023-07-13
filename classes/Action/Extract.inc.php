@@ -202,7 +202,8 @@ class Extract extends Form
 
         // get all dependent files
         foreach (array_diff(scandir($this->workingDirAbsolutePath), ['..', '.']) as $index => $fileName) {
-            if($fileName !== $this->mainFileName){
+            if($fileName !== $this->mainFileName &&
+                is_file($this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $fileName)){
                 $this->dependentFileNames[] = $fileName;
             }
         }
