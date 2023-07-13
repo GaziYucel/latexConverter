@@ -2,7 +2,7 @@
 
 The plugin for OJS 3.3 that allows to convert articles in Latex to PDF format.
 
-## Features
+# Features
 
 ### Extract Archive
 
@@ -33,27 +33,26 @@ Clicking this button will do the following:
     - add the log file to the submission
     - add other output files as dependent files (aux, bcf, out, run.xml)
 
-## Requirements
+# Install and confige the plugin
+
+### Requirements
 
 - PHP 8.0,8.1
 - TexLive for your platform
 
-## Manual installation of the plugin
+### Install with Git
 
 ```shell
 git clone https://github.com/GaziYucel/latexConverter
 ```
-Alternatively, you can download the latest release or download the code with the option 'Download ZIP'. Extract the downloaded file to `./plugins/generic/latexConverter`.
 
-## Configuration of the plugin
-- 
-- Login in your OJS instance as an Administrator or Manager
-- Navigate to Website > Plugins > Installed Plugins > Generic Plugins > LaTex to PDF Converter Plugin > Settings
-- Fill in the absolute path to pdflatex executable, e.g. /var/www/TexLive/texmf/bin/x86_64-linux/pdflatex
-- Fill in the field "Allowed mime types" with mime types which should show dependent files. For Tex files fill in "text/x-tex" and "application/x-tex" on separate lines
-- Click Save
+### Install via direct download
 
-## Installation of TexLive portable on Linux
+- Download release for your OJS version from https://github.com/GaziYucel/latexConverter/releases
+- Alternatively, download the code with the option 'Download ZIP'. 
+- Extract the downloaded file to `./plugins/generic/latexConverter`.
+
+### Install TexLive portable (Linux)
 
 ```shell
 # example of installation path: /var/www/TexLive
@@ -69,20 +68,58 @@ cd /var/www/TexLive
 rm -rf tmp
 ```
 
-## Manual usage of pdflatex
+#### Manual usage of pdflatex
 
-- `cd /path-to-some-latex-project`
-- `/var/www/TexLive/texmf/bin/x86_64_linux/pdflatex -no-shell-escape -interaction=nonstopmode main.tex`
+```shell
+cd /path-to-some-latex-project
+/var/www/TexLive/texmf/bin/x86_64_linux/pdflatex -no-shell-escape -interaction=nonstopmode main.tex
+```
 
-## Development
+### Configuration of the plugin
+
+- Login in your OJS instance as an Administrator or Manager
+- Navigate to Website > Plugins > Installed Plugins > Generic Plugins > LaTex to PDF Converter Plugin > Settings
+- Fill in the absolute path to pdflatex executable, e.g. /var/www/TexLive/texmf/bin/x86_64-linux/pdflatex
+- Fill in the field "Allowed mime types" with mime types which should show dependent files. For Tex files fill in "text/x-tex" and "application/x-tex" on separate lines
+- Click Save
+
+# Development
 
 - Fork the repository
 - Make your changes
 - Open a PR with your changes
 
-## Development notes
+### Structure
+    .
+    ├── classes
+    │   ├── Action                            # Features main classes
+    │   │   ├── Convert.inc.php               # Convert to PDF feature main class
+    │   │   └── Extract.inc.php               # Extract archive feature main class
+    │   ├── Components
+    │   │   └── Forms
+    │   │       └── SettingsForm.inc.php      # Settings form class
+    │   ├── Handler
+    │   │   └── PluginHandler.inc.php         # Main plugin handler / controller
+    │   ├── Models                            # Helper classes
+    │   │   ├── ArticleSubmissionFile.inc.php # Add submission files to submission
+    │   │   ├── Cleanup.inc.php               # Cleanup methods
+    │   │   └── Log.php                       # Logging to file methods
+    ├── images                                # Images used by the plugin
+    ├── locale                                # Language files
+    ├── templates                             # Templates folder
+    │   ├── extract.tpl                       # Template for the extract modal
+    │   └── settings.tpl                      # Settings template
+    ├── vendor                                # Composer autoload and dependencies    
+    ├── .gitignore                            # Git ignore file
+    ├── composer.json                         # Composer file, e.g. dependencies, classmap
+    ├── index.php                             # Main entry point of plugin
+    ├── LatexConverterPlugin.inc.php          # Main class of plugin
+    ├── README.md                             # This file
+    └── version.xml                           # Current version of the plugin
 
-- Auto loading of the classes in the folder `classes` is done with composer [classmap](https://getcomposer.org/doc/04-schema.md#classmap). 
+### Notes
+
+- Auto loading of the classes in the folder `classes` is done with composer [classmap](https://getcomposer.org/doc/04-schema.md#classmap).
 - If you add or remove classes in this folder, run the following command to update the autoload files: `composer dump-autoload -o`.
 - Running `composer install -o` or `composer update -o` will also generate the autoload files
 - The `-o` option generates the optimised files ready for production.
