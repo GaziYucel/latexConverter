@@ -35,12 +35,12 @@ Clicking this button will do the following:
 
 ![latexConverter - extract and convert](.project/images/latexConverter-extract-convert.gif)
 
-# Install and confige the plugin
+# Install and configure the plugin
 
 ### Requirements
 
-- PHP 8.0,8.1
-- TexLive for your platform
+- PHP 8.1+
+- A LaTex converter for your platform, e.g. TexLive
 
 ### Install with Git
 
