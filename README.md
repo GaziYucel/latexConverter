@@ -123,9 +123,26 @@ cd /path-to-some-latex-project
 
 ### Notes
 
-- Auto loading of the classes in the folder `classes` is done with composer [classmap](https://getcomposer.org/doc/04-schema.md#classmap).
+- Auto loading of the classes in the folder `classes` is done with composer [classmap](#Classmap).
 - If you add or remove classes in this folder, run the following command to update the autoload files: `composer dump-autoload -o`.
 - Running `composer install -o` or `composer update -o` will also generate the autoload files
 - The `-o` option generates the optimised files ready for production.
+
+### Classmap
+
+The classmap references are all combined, during install/update, into a single key => value array which may be found in the generated file vendor/composer/autoload_classmap.php. This map is built by scanning for classes in all .php and .inc files in the given directories/files.
+
+You can use the classmap generation support to define autoloading for all libraries that do not follow PSR-0/4. To configure this you specify all directories or files to search for classes.
+
+Example: 
+```
+{ 
+  "autoload": {
+    "classmap": ["src/", "lib/", "Something.php"]
+  }
+}
+```
+
+You can find more information about classmap [here](https://getcomposer.org/doc/04-schema.md#classmap). 
 
 ...
