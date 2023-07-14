@@ -33,6 +33,8 @@ Clicking this button will do the following:
     - add the log file to the submission
     - add other output files as dependent files (aux, bcf, out, run.xml)
 
+![latexConverter - extract and convert](.project/images/latexConverter-extract-convert.gif)
+
 # Install and confige the plugin
 
 ### Requirements
@@ -82,6 +84,8 @@ cd /path-to-some-latex-project
 - Fill in the absolute path to pdflatex executable, e.g. /var/www/TexLive/texmf/bin/x86_64-linux/pdflatex
 - Fill in the field "Allowed mime types" with mime types which should show dependent files. For Tex files fill in "text/x-tex" and "application/x-tex" on separate lines
 - Click Save
+
+![latexConverter - settings](.project/images/latexConverter-settings.gif)
 
 # Development
 
