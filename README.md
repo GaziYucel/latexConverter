@@ -50,7 +50,7 @@ git clone https://github.com/GaziYucel/latexConverter
 
 ### Install via direct download
 
-- Download release for your OJS version from https://github.com/GaziYucel/latexConverter/releases
+- Download release for your OJS version from https://github.com/TIBHannover/latexConverter/releases
 - Alternatively, download the code with the option 'Download ZIP'. 
 - Extract the downloaded file to `./plugins/generic/latexConverter`.
 
