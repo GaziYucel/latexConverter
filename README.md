@@ -1,6 +1,22 @@
+
 # Latex to PDF Converter Plugin
 
 The plugin for OJS 3.3 that allows to convert articles in Latex to PDF format.
+
+
+-   [Latex to PDF Converter Plugin](#latex-to-pdf-converter-plugin)
+-   [Features](#features)
+    -   [Extract Archive](#extract-archive)
+    -   [Convert to PDF](#convert-to-pdf)
+-   [Install and configure the plugin](#install-and-configure-the-plugin)
+    -   [Requirements](#requirements)
+    -   [Install with Git](#install-with-git)
+    -   [Install via direct download](#install-via-direct-download)
+    -   [Install TexLive portable  (Linux)](#install-texlive-portable-linux)
+    -   [Configuration of the plugin](#configuration-of-the-plugin)
+-   [Development](#development)
+    -   [Structure](#structure)
+    -   [Notes](#notes)
 
 # Features
 
