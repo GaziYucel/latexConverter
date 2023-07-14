@@ -38,19 +38,19 @@ class ArticleSubmissionFile
     /**
      * @var object SubmissionFile
      */
-    protected object $submissionFile;
+    protected object $originalSubmissionFile;
 
     /**
      * This is the newly inserted main file object
      * @var object SubmissionFile
      */
-    protected object $insertedNewSubmissionFile;
+    protected object $newSubmissionFile;
 
     /**
      * This array is a list of SubmissionFile objects
      * @var array [ SubmissionFile, ... ]
      */
-    protected array $insertedNewDependentSubmissionFiles = [];
+    protected array $newDependentSubmissionFiles = [];
 
     /**
      * Absolute path to the directory with the extracted content of archive
@@ -80,14 +80,14 @@ class ArticleSubmissionFile
      */
     protected array $dependentFileNames = [];
 
-    public function __construct($request, $submissionId, $submissionFile, $workingDirAbsolutePath,
+    public function __construct($request, $submissionId, $originalSubmissionFile, $workingDirAbsolutePath,
                                 $submissionFilesRelativeDir, $mainFileName, $dependentFiles)
     {
         $this->notificationManager = new NotificationManager();
 
         $this->request = $request;
         $this->submissionId = $submissionId;
-        $this->submissionFile = $submissionFile;
+        $this->originalSubmissionFile = $originalSubmissionFile;
         $this->mainFileName  = $mainFileName;
         $this->dependentFileNames = $dependentFiles;
 
@@ -104,7 +104,7 @@ class ArticleSubmissionFile
         $newFileExtension = pathinfo($this->mainFileName, PATHINFO_EXTENSION);
         $newFileNameReal = uniqid() . '.' . $newFileExtension;
         $newFileNameDisplay = [];
-        foreach ($this->submissionFile->getData('name') as $localeKey => $name) {
+        foreach ($this->originalSubmissionFile->getData('name') as $localeKey => $name) {
             $newFileNameDisplay[$localeKey] = pathinfo($name)['filename'] . '.' . $newFileExtension;
         }
 
@@ -116,28 +116,26 @@ class ArticleSubmissionFile
         // add file link to database
         $newFileParams = [
             'fileId' => $newFileId,
-            'assocId' => $this->submissionFile->getData('assocId'),
-            'assocType' => $this->submissionFile->getData('assocType'),
-            'fileStage' => $this->submissionFile->getData('fileStage'),
+            'assocId' => $this->originalSubmissionFile->getData('assocId'),
+            'assocType' => $this->originalSubmissionFile->getData('assocType'),
+            'fileStage' => $this->originalSubmissionFile->getData('fileStage'),
             'mimetype' => LATEX_CONVERTER_LATEX_FILE_TYPE,
-            'locale' => $this->submissionFile->getData('locale'),
-            'genreId' => $this->submissionFile->getData('genreId'),
+            'locale' => $this->originalSubmissionFile->getData('locale'),
+            'genreId' => $this->originalSubmissionFile->getData('genreId'),
             'name' => $newFileNameDisplay,
             'submissionId' => $this->submissionId
         ];
         $submissionFileDao = new SubmissionFileDAO();
         $newFileObject = $submissionFileDao->newDataObject();
         $newFileObject->setAllData($newFileParams);
-        $insertedNewFileObject = Services::get('submissionFile')->add($newFileObject, $this->request);
+        $this->newSubmissionFile = Services::get('submissionFile')->add($newFileObject, $this->request);
 
-        if (empty($insertedNewFileObject)) {
+        if (empty($this->newSubmissionFile)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser(), NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
             return false;
         }
-
-        $this->insertedNewSubmissionFile = $insertedNewFileObject;
 
         return true;
     }
@@ -152,7 +150,7 @@ class ArticleSubmissionFile
             $newFileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
             $newFileNameReal = uniqid() . '.' . $newFileExtension;
             $newFileNameDisplay = [];
-            foreach ($this->submissionFile->getData('name') as $localeKey => $name) {
+            foreach ($this->originalSubmissionFile->getData('name') as $localeKey => $name) {
                 $newFileNameDisplay[$localeKey] = pathinfo($fileName, PATHINFO_BASENAME);
             }
 
@@ -174,7 +172,7 @@ class ArticleSubmissionFile
             // add file link to database
             $newFileParams = [
                 'fileId' => $newFileId,
-                'assocId' => $this->insertedNewSubmissionFile->getId(),
+                'assocId' => $this->newSubmissionFile->getId(),
                 'assocType' => ASSOC_TYPE_SUBMISSION_FILE,
                 'fileStage' => SUBMISSION_FILE_DEPENDENT,
                 'submissionId' => $this->submissionId,
@@ -184,7 +182,7 @@ class ArticleSubmissionFile
             $submissionFileDao = new SubmissionFileDAO();
             $newFileObject = $submissionFileDao->newDataObject();
             $newFileObject->setAllData($newFileParams);
-            $this->insertedNewDependentSubmissionFiles[] = Services::get('submissionFile')->add($newFileObject, $this->request);
+            $this->newDependentSubmissionFiles[] = Services::get('submissionFile')->add($newFileObject, $this->request);
         }
 
         return true;
