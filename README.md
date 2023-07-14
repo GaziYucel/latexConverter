@@ -40,7 +40,7 @@ Clicking this button will do the following:
 ### Requirements
 
 - PHP 8.1+
-- A LaTex converter for your platform, e.g. TexLive
+- A LaTex converter for your platform, e.g. [TexLive](https://tug.org/texlive)
 
 ### Install with Git
 
