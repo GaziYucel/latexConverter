@@ -245,6 +245,9 @@ class Extract extends Form
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $stat = $zip->statIndex($i);
+
+            if(count(explode(DIRECTORY_SEPARATOR, $stat['name'])) !== 2) continue;
+
             $fileName = basename($stat['name']);
             if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), LATEX_CONVERTER_TEX_EXTENSIONS)) {
                 $texFiles[] = $fileName;
