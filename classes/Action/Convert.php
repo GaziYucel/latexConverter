@@ -25,7 +25,7 @@ use PKPRequest;
 use PrivateFileManager;
 use Services;
 use SubmissionDAO;
-use APP\plugins\generic\latexConverter\classes\Helpers\ArticleSubmissionFile;
+use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
 
 class Convert
 {
@@ -353,8 +353,8 @@ class Convert
             if ($file !== $this->mainFileName && $file !== $fileToAdd)
                 $this->dependentFileNames[] = $file;
 
-        $articleSubmissionFile =
-            new ArticleSubmissionFile(
+        $submissionFileHelper =
+            new SubmissionFileHelper(
                 $this->request,
                 $this->submissionId,
                 $this->submissionFile,
@@ -363,10 +363,10 @@ class Convert
                 $fileToAdd,
                 $this->dependentFileNames);
 
-        if (!$articleSubmissionFile->addMainFile()) return false;
+        if (!$submissionFileHelper->addMainFile()) return false;
 
         if (!empty($this->dependentFileNames))
-            if (!$articleSubmissionFile->addDependentFiles()) return false;
+            if (!$submissionFileHelper->addDependentFiles()) return false;
 
         return true;
     }

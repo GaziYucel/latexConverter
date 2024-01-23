@@ -1,15 +1,15 @@
 <?php
 /**
- * @file plugins/generic/latexConverter/classes/Models/ArticleSubmissionFile.php
+ * @file plugins/generic/latexConverter/classes/Models/SubmissionFileHelper.php
  *
  * Copyright (c) 2023+ TIB Hannover
  * Copyright (c) 2023+ Gazi Yucel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @class ArticleSubmissionFile
+ * @class SubmissionFileHelper
  * @ingroup plugins_generic_latexconverter
  *
- * @brief ArticleSubmissionFile methods
+ * @brief SubmissionFileHelper methods
  */
 
 namespace APP\plugins\generic\latexConverter\classes\Helpers;
@@ -21,7 +21,7 @@ use Services;
 use SubmissionFile;
 use SubmissionFileDAO;
 
-class ArticleSubmissionFile
+class SubmissionFileHelper
 {
     /**
      * @var NotificationManager

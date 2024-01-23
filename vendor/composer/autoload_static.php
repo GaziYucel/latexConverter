@@ -11,9 +11,9 @@ class ComposerStaticInit1b66bd88bb6dab52bf3af9b9a16ca7a1
         'APP\\plugins\\generic\\latexConverter\\classes\\Action\\Extract' => __DIR__ . '/../..' . '/classes/Action/Extract.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Components\\Forms\\SettingsForm' => __DIR__ . '/../..' . '/classes/Components/Forms/SettingsForm.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\PluginHandler' => __DIR__ . '/../..' . '/classes/Handler/PluginHandler.php',
-        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ArticleSubmissionFile' => __DIR__ . '/../..' . '/classes/Helpers/ArticleSubmissionFile.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\SubmissionFileHelper' => __DIR__ . '/../..' . '/classes/Helpers/SubmissionFileHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\FileSystemHelper' => __DIR__ . '/../..' . '/classes/Helpers/FileSystemHelper.php',
-        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\Log' => __DIR__ . '/../..' . '/classes/Helpers/Log.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\LogHelper' => __DIR__ . '/../..' . '/classes/Helpers/LogHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ZipHelper' => __DIR__ . '/../..' . '/classes/Helpers/ZipHelper.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
