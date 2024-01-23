@@ -51,7 +51,7 @@ msgid "plugins.generic.latexConverter.executable.notConfigured"
 msgstr "Latex converter is not configured"
 
 msgid "plugins.generic.latexConverter.modal.extract.title"
-msgstr "Below are listed the files of the archive file. Please select the file which will be the main document."
+msgstr "Below are listed the files of the archive file.<br/> Please select the file which will be the main document."
 
 msgid "plugins.generic.latexConverter.modal.extract.label"
 msgstr "Please select a file"
