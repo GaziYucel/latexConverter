@@ -132,7 +132,7 @@ cd /path-to-some-latex-project
     │   ├── Handler
     │   │   └── PluginHandler.php         # Main plugin handler / controller
     │   ├── Helpers                       # Helper classes
-    │   │   ├── ArticleSubmissionFile.php # Add submission files to submission
+    │   │   ├── SubmissionFileHelper.php  # Add submission files to submission
     │   │   ├── FileSystemHelper.php      # FileSystem methods
     │   │   ├── LogHelper.php             # Logging methods
     │   │   └── ZipHelper.php             # ZipArchive methods
