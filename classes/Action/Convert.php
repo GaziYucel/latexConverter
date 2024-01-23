@@ -19,7 +19,7 @@ use APP\facades\Repo;
 use APP\notification\Notification;
 use APP\notification\NotificationManager;
 use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
-use APP\plugins\generic\latexConverter\classes\Helpers\ArticleSubmissionFile;
+use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
 use PKP\config\Config;
 use PKP\core\JSONMessage;
 use PKP\core\PKPRequest;
@@ -355,8 +355,8 @@ class Convert
             if ($file !== $this->mainFileName && $file !== $fileToAdd)
                 $this->dependentFileNames[] = $file;
 
-        $articleSubmissionFile =
-            new ArticleSubmissionFile(
+        $submissionFileHelper =
+            new SubmissionFileHelper(
                 $this->request,
                 $this->submissionId,
                 $this->submissionFile,
@@ -365,10 +365,10 @@ class Convert
                 $fileToAdd,
                 $this->dependentFileNames);
 
-        if (!$articleSubmissionFile->addMainFile()) return false;
+        if (!$submissionFileHelper->addMainFile()) return false;
 
         if (!empty($this->dependentFileNames))
-            if (!$articleSubmissionFile->addDependentFiles()) return false;
+            if (!$submissionFileHelper->addDependentFiles()) return false;
 
         return true;
     }

@@ -20,7 +20,7 @@ use APP\notification\Notification;
 use APP\notification\NotificationManager;
 use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
 use APP\plugins\generic\latexConverter\classes\Helpers\ZipHelper;
-use APP\plugins\generic\latexConverter\classes\Helpers\ArticleSubmissionFile;
+use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
 use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use APP\template\TemplateManager;
 use PKP\core\JSONMessage;
@@ -245,8 +245,8 @@ class Extract extends Form
         }
 
         // add main file
-        $articleSubmissionFile =
-            new ArticleSubmissionFile(
+        $submissionFileHelper =
+            new SubmissionFileHelper(
                 $this->request,
                 $this->submissionId,
                 $this->submissionFile,
@@ -256,11 +256,11 @@ class Extract extends Form
                 $this->dependentFileNames);
 
         if (!empty($this->mainFileName))
-            if (!$articleSubmissionFile->addMainFile()) return $this->defaultResponse();
+            if (!$submissionFileHelper->addMainFile()) return $this->defaultResponse();
 
         // add dependent files
         if (!empty($this->dependentFileNames))
-            if (!$articleSubmissionFile->addDependentFiles()) return $this->defaultResponse();
+            if (!$submissionFileHelper->addDependentFiles()) return $this->defaultResponse();
 
         // all went well, return ok
         return $this->defaultResponse(true);

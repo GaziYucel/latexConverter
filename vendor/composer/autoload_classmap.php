@@ -10,9 +10,9 @@ return array(
     'APP\\plugins\\generic\\latexConverter\\classes\\Action\\Extract' => $baseDir . '/classes/Action/Extract.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Components\\Forms\\SettingsForm' => $baseDir . '/classes/Components/Forms/SettingsForm.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\PluginHandler' => $baseDir . '/classes/Handler/PluginHandler.php',
-    'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ArticleSubmissionFile' => $baseDir . '/classes/Helpers/ArticleSubmissionFile.php',
+    'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\SubmissionFileHelper' => $baseDir . '/classes/Helpers/SubmissionFileHelper.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\FileSystemHelper' => $baseDir . '/classes/Helpers/FileSystemHelper.php',
-    'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\Log' => $baseDir . '/classes/Helpers/Log.php',
+    'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\LogHelper' => $baseDir . '/classes/Helpers/LogHelper.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ZipHelper' => $baseDir . '/classes/Helpers/ZipHelper.php',
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
 );

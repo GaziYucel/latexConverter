@@ -1,12 +1,12 @@
 <?php
 /**
- * @file plugins/generic/latexConverter/classes/Models/Log.php
+ * @file plugins/generic/latexConverter/classes/Models/LogHelper.php
  *
  * Copyright (c) 2023+ TIB Hannover
  * Copyright (c) 2023+ Gazi Yucel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @class Log
+ * @class LogHelper
  * @ingroup plugins_generic_latexconverter
  *
  * @brief Logging helper class
@@ -16,7 +16,7 @@ namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
 use PKP\config\Config;
 
-class Log
+class LogHelper
 {
     /**
      * Path to file
