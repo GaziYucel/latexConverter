@@ -12,6 +12,6 @@
  * @brief Wrapper for the latexConverter plugin.
  */
 
-require_once('LatexConverterPlugin.inc.php');
+require_once('LatexConverterPlugin.php');
 
 return new LatexConverterPlugin();
