@@ -14,7 +14,7 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
-use Config;
+use PKP\config\Config;
 
 class Log
 {

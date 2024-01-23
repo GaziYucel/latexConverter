@@ -14,7 +14,7 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
-use LatexConverterPlugin;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use ZipArchive;
 
 class ZipHelper

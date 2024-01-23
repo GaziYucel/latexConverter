@@ -14,14 +14,12 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Handler;
 
-import('classes.handler.Handler');
-import('lib.pkp.classes.security.authorization.WorkflowStageAccessPolicy');
-
-use Handler;
-use JSONMessage;
-use LatexConverterPlugin;
-use PluginRegistry;
-use WorkflowStageAccessPolicy;
+use APP\core\Application;
+use APP\handler\Handler;
+use PKP\core\JSONMessage;
+use PKP\plugins\PluginRegistry;
+use PKP\security\authorization\WorkflowStageAccessPolicy;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use APP\plugins\generic\latexConverter\classes\Action\Convert;
 use APP\plugins\generic\latexConverter\classes\Action\Extract;
 
@@ -103,7 +101,7 @@ class PluginHandler extends Handler
         return $request->redirectUrlJson(
             $request->getDispatcher()->url(
                 $request,
-                ROUTE_PAGE,
+                Application::ROUTE_PAGE,
                 null,
                 'workflow',
                 'access',

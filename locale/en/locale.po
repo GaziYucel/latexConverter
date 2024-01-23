@@ -1,0 +1,61 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2023-05-01T12:00:00+00:00\n"
+"PO-Revision-Date: 2023-05-01T12:00:00+00:00\n"
+"Language: \n"
+
+msgid "plugins.generic.latexConverter.displayName"
+msgstr "LaTex to PDF Converter Plugin"
+
+msgid "plugins.generic.latexConverter.description"
+msgstr "Transforms journal articles from LaTex to PDF format."
+
+msgid "plugins.generic.latexConverter.settings.path_executable.label"
+msgstr "Absolute path to LaTex executable. e.g $MY_FOLDER/TexLive/texmf/bin/x86_64-linux/pdflatex"
+
+msgid "plugins.generic.latexConverter.settings.authorised_mime_types.label"
+msgstr "Allowed mimetypes. One mimetype per line, e.g. text/x-tex"
+
+msgid "plugins.generic.latexConverter.button.extract"
+msgstr "Extract Archive"
+
+msgid "plugins.generic.latexConverter.button.convert"
+msgstr "Convert LaTex to Pdf"
+
+msgid "plugins.generic.latexConverter.notification.defaultErrorOccurred"
+msgstr "Errors occurred while processing request. Please try again or contact your administrator."
+
+msgid "plugins.generic.latexConverter.notification.errorOpeningFile"
+msgstr "Couldn't open file, the file might be corrupt. Please upload file again."
+
+msgid "plugins.generic.latexConverter.notification.noValidZipFile"
+msgstr "This file is not a valid ZIP file"
+
+msgid "plugins.generic.latexConverter.notification.noFileSelected"
+msgstr "You have not selected a file as the main file. Please try again"
+
+msgid "plugins.generic.latexConverter.notification.extracted"
+msgstr "File extraction successful"
+
+msgid "plugins.generic.latexConverter.executable.notFound"
+msgstr "Configured latex converter is unavailable"
+
+msgid "plugins.generic.latexConverter.executable.notConfigured"
+msgstr "Latex converter is not configured"
+
+msgid "plugins.generic.latexConverter.modal.extract.title"
+msgstr "Below are listed the files of the archive file.<br/>Please select the file which will be the main document."
+
+msgid "plugins.generic.latexConverter.modal.extract.label"
+msgstr "Please select a file"
+
+msgid "plugins.generic.latexConverter.modal.extract.button"
+msgstr "Extract and save"
+

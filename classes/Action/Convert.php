@@ -14,18 +14,18 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Action;
 
-import('lib.pkp.classes.file.PrivateFileManager');
-
+use APP\core\Application;
+use APP\facades\Repo;
+use APP\notification\Notification;
+use APP\notification\NotificationManager;
 use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
-use Config;
-use JSONMessage;
-use LatexConverterPlugin;
-use NotificationManager;
-use PKPRequest;
-use PrivateFileManager;
-use Services;
-use SubmissionDAO;
 use APP\plugins\generic\latexConverter\classes\Helpers\ArticleSubmissionFile;
+use PKP\config\Config;
+use PKP\core\JSONMessage;
+use PKP\core\PKPRequest;
+use PKP\file\PrivateFileManager;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
+use PKP\submissionFile\SubmissionFile;
 
 class Convert
 {
@@ -154,7 +154,7 @@ class Convert
         $this->request = $request;
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
-        $this->submissionFile = Services::get('submissionFile')->get($this->submissionFileId);
+        $this->submissionFile = Repo::submissionFile()->get($this->submissionFileId);
 
         $this->mainFileName =
             $this->submissionFile->getData('name')[$this->submissionFile->getData('locale')];
@@ -166,13 +166,12 @@ class Convert
             '.' . LatexConverterPlugin::LATEX_CONVERTER_LOG_EXTENSION, $this->mainFileName);
 
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
-        $submissionDao = new SubmissionDAO();
-        $this->submission = $submissionDao->getById($this->submissionId);
+        $this->submission = Repo::submission()->get($this->submissionId);
 
         $this->workingDirAbsolutePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
             LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
 
-        $this->submissionFilesRelativeDir = Services::get('submissionFile')
+        $this->submissionFilesRelativeDir = Repo::submissionFile()
             ->getSubmissionDir($this->submission->getData('contextId'), $this->submissionId);
 
         $this->ojsFilesAbsoluteBaseDir = Config::getVar('files', 'files_dir');
@@ -191,7 +190,7 @@ class Convert
         if (empty($this->latexExe)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.executable.notConfigured')));
             return $this->defaultResponse();
         }
@@ -200,7 +199,7 @@ class Convert
         if (!mkdir($this->workingDirAbsolutePath, 0777, true)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
             return $this->defaultResponse();
         }
@@ -209,7 +208,7 @@ class Convert
         if (!$this->getSubmissionFileMain()) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
             return $this->defaultResponse();
         }
@@ -218,7 +217,7 @@ class Convert
         if (!$this->getSubmissionFileDependents()) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
             return $this->defaultResponse();
         }
@@ -227,7 +226,7 @@ class Convert
         if (!$this->copyFilesToWorkingDir()) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
             return $this->defaultResponse();
         }
@@ -236,7 +235,7 @@ class Convert
         if (!$this->convertToPdf()) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred')));
             return $this->defaultResponse();
         }
@@ -264,7 +263,7 @@ class Convert
     private function getSubmissionFileMain(): bool
     {
         $this->submissionFileMain[] =
-            Services::get('submissionFile')->get($this->submissionFileId);
+            Repo::submissionFile()->get($this->submissionFileId);
 
         if (empty($this->submissionFileMain)) return false;
 
@@ -278,11 +277,14 @@ class Convert
      */
     private function getSubmissionFileDependents(): bool
     {
-        $allFiles = Services::get('submissionFile')->getMany([
-            'assocIds' => [$this->submissionId],
-            'submissionIds' => [$this->submissionId],
-            'includeDependentFiles' => true
-        ]);
+        $allFiles = Repo::submissionFile()->getCollector()
+            ->filterByAssoc(
+                Application::ASSOC_TYPE_SUBMISSION_FILE,
+                [$this->submissionFile->getId()])
+            ->filterBySubmissionIds([$this->submissionId])
+            ->filterByFileStages([SubmissionFile::SUBMISSION_FILE_DEPENDENT])
+            ->includeDependentFiles()
+            ->getMany();
 
         foreach ($allFiles as $file) {
             if ($file->getData('assocId') == $this->submissionFileId)

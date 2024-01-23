@@ -14,15 +14,14 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Components\Forms;
 
-import('lib.pkp.classes.form.Form');
-
-use Form;
-use LatexConverterPlugin;
-use FormValidatorPost;
-use FormValidatorCSRF;
-use Application;
-use TemplateManager;
-use NotificationManager;
+use APP\core\Application;
+use APP\notification\Notification;
+use APP\notification\NotificationManager;
+use APP\template\TemplateManager;
+use PKP\form\Form;
+use PKP\form\validation\FormValidatorCSRF;
+use PKP\form\validation\FormValidatorPost;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 
 class SettingsForm extends Form
 {
@@ -68,7 +67,7 @@ class SettingsForm extends Form
 
         $contextId = $context
             ? $context->getId()
-            : CONTEXT_SITE;
+            : Application::CONTEXT_SITE;
 
         foreach ($this->settings as $key) {
             $this->setData(
@@ -130,7 +129,7 @@ class SettingsForm extends Form
 
         $contextId = $context
             ? $context->getId()
-            : CONTEXT_SITE;
+            : Application::CONTEXT_SITE;
 
         foreach ($this->settings as $key) {
             $this->plugin->updateSetting(
@@ -143,7 +142,7 @@ class SettingsForm extends Form
         $notificationMgr = new NotificationManager();
         $notificationMgr->createTrivialNotification(
             Application::get()->getRequest()->getUser()->getId(),
-            NOTIFICATION_TYPE_SUCCESS,
+            Notification::NOTIFICATION_TYPE_SUCCESS,
             ['contents' => __('common.changesSaved')]
         );
 

@@ -15,24 +15,19 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Action;
 
-import('lib.pkp.classes.file.PrivateFileManager');
-import('lib.pkp.classes.submission.GenreDAO');
-import('lib.pkp.classes.form.Form');
-
-use APP\plugins\generic\latexConverter\classes\Helpers\ZipHelper;
-use Exception;
-use Form;
-use JSONMessage;
-use LatexConverterPlugin;
-use NotificationManager;
-use PKPRequest;
-use PrivateFileManager;
-use Services;
-use SubmissionDAO;
-use TemplateManager;
-use ZipArchive;
-use APP\plugins\generic\latexConverter\classes\Helpers\ArticleSubmissionFile;
+use APP\facades\Repo;
+use APP\notification\Notification;
+use APP\notification\NotificationManager;
 use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
+use APP\plugins\generic\latexConverter\classes\Helpers\ZipHelper;
+use APP\plugins\generic\latexConverter\classes\Helpers\ArticleSubmissionFile;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
+use APP\template\TemplateManager;
+use PKP\core\JSONMessage;
+use PKP\core\PKPRequest;
+use PKP\file\PrivateFileManager;
+use PKP\form\Form;
+use Exception;
 
 class Extract extends Form
 {
@@ -135,11 +130,9 @@ class Extract extends Form
         $this->request = $request;
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
-        $this->submissionFile = Services::get('submissionFile')->get($this->submissionFileId);
-
+        $this->submissionFile = Repo::submissionFile()->get($this->submissionFileId);
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
-        $submissionDao = new SubmissionDAO();
-        $this->submission = $submissionDao->getById($this->submissionId);
+        $this->submission = Repo::submission()->get($this->submissionId);
 
         $this->archiveFileAbsolutePath = $this->fileManager->getBasePath() . DIRECTORY_SEPARATOR .
             $this->submissionFile->getData('path');
@@ -147,7 +140,7 @@ class Extract extends Form
         $this->workingDirAbsolutePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
             LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
 
-        $this->submissionFilesRelativeDir = Services::get('submissionFile')
+        $this->submissionFilesRelativeDir = Repo::submissionFile()
             ->getSubmissionDir($this->submission->getData('contextId'), $this->submissionId);
 
         parent::__construct($this->plugin->getTemplateResource('extract.tpl'));
@@ -204,7 +197,7 @@ class Extract extends Form
         if (empty($this->mainFileName)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.noFileSelected')));
             return $this->defaultResponse();
         }

@@ -12,13 +12,21 @@
  * @brief Plugin LatexConverter
  */
 
+namespace APP\plugins\generic\latexConverter;
+
 require_once(__DIR__ . '/vendor/autoload.php');
 
-import('lib.pkp.classes.plugins.GenericPlugin');
-import('lib.pkp.classes.linkAction.request.OpenWindowAction');
-import('lib.pkp.classes.linkAction.request.PostAndRedirectAction');
-import('lib.pkp.classes.linkAction.request.AjaxModal');
-
+use APP\core\Application;
+use APP\facades\Repo;
+use PKP\config\Config;
+use PKP\core\JSONMessage;
+use PKP\linkAction\LinkAction;
+use PKP\linkAction\request\AjaxModal;
+use PKP\plugins\GenericPlugin;
+use PKP\plugins\Hook;
+use PKP\security\Role;
+use PKP\submissionFile\SubmissionFile;
+use PKP\linkAction\request\PostAndRedirectAction;
 use APP\plugins\generic\latexConverter\classes\Components\Forms\SettingsForm;
 
 define('LATEX_CONVERTER_PLUGIN_NAME', basename(__FILE__, '.php'));
@@ -30,7 +38,7 @@ class LatexConverterPlugin extends GenericPlugin
     public const LATEX_CONVERTER_TEX_EXTENSION = 'tex';
     public const LATEX_CONVERTER_PDF_EXTENSION = 'pdf';
     public const LATEX_CONVERTER_LOG_EXTENSION = 'log';
-    public const LATEX_CONVERTER_AUTHORIZED_ROLES = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
+    public const LATEX_CONVERTER_AUTHORIZED_ROLES = [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT];
     public const LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE = 'LatexConverter_PathToExecutable';
     public const LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES = 'LatexConverter_AuthorisedMimeTypes';
     public const LATEX_CONVERTER_EXTENSIONS = [
@@ -51,10 +59,10 @@ class LatexConverterPlugin extends GenericPlugin
     {
         if (parent::register($category, $path, $mainContextId)) {
             if ($this->getEnabled()) {
-                HookRegistry::register('TemplateManager::fetch', [$this, 'callbackTemplateFetch']);
-                HookRegistry::register('LoadHandler', [$this, 'callbackLoadHandler']);
+                Hook::add('TemplateManager::fetch', [$this, 'callbackTemplateFetch']);
+                Hook::add('LoadHandler', [$this, 'callbackLoadHandler']);
 
-                HookRegistry::register('SubmissionFile::supportsDependentFiles', [$this, 'callbackSupportsDependentFiles']);
+                Hook::add('SubmissionFile::supportsDependentFiles', [$this, 'callbackSupportsDependentFiles']);
 
                 $this->_registerTemplateResource();
             }
@@ -86,7 +94,7 @@ class LatexConverterPlugin extends GenericPlugin
                 $fileExtension = strtolower($submissionFile->getData('mimetype'));
                 $stageId = (int)$request->getUserVar('stageId');
                 $submissionId = $submissionFile->getData('submissionId');
-                $submission = Services::get('submission')->get($submissionId);
+                $submission = Repo::submission()->get($submissionId);
                 $submissionStageId = $submission->getData('stageId');
                 $roles = $request->getUser()->getRoles($request->getContext()->getId());
                 $isAuthorized = false;
@@ -111,7 +119,7 @@ class LatexConverterPlugin extends GenericPlugin
 
                     $pathRedirect = $dispatcher->url(
                         $request,
-                        ROUTE_PAGE,
+                        Application::ROUTE_PAGE,
                         null,
                         'workflow',
                         'access',
@@ -120,10 +128,9 @@ class LatexConverterPlugin extends GenericPlugin
 
                     // only show link if file is zip
                     if (strtolower($fileExtension) == LatexConverterPlugin::LATEX_CONVERTER_ZIP_FILE_TYPE) {
-
                         $path = $dispatcher->url(
                             $request,
-                            ROUTE_PAGE,
+                            Application::ROUTE_PAGE,
                             null,
                             'latexConverter',
                             'extractShow',
@@ -153,7 +160,7 @@ class LatexConverterPlugin extends GenericPlugin
 
                         $path = $dispatcher->url(
                             $request,
-                            ROUTE_PAGE,
+                            Application::ROUTE_PAGE,
                             null,
                             'latexConverter',
                             'convert',
@@ -213,8 +220,8 @@ class LatexConverterPlugin extends GenericPlugin
 
         $fileStage = $submissionFile->getData('fileStage');
         $excludedFileStages = [
-            SUBMISSION_FILE_DEPENDENT,
-            SUBMISSION_FILE_QUERY,
+            SubmissionFile::SUBMISSION_FILE_DEPENDENT,
+            SubmissionFile::SUBMISSION_FILE_QUERY,
         ];
 
         $allowedMimetypes = ['text/x-tex', 'application/x-tex'];
@@ -351,4 +358,9 @@ class LatexConverterPlugin extends GenericPlugin
 
         return 'plugins.generic.latexConverter.button.convert';
     }
+}
+
+// For backwards compatibility -- expect this to be removed approx. OJS/OMP/OPS 3.6
+if (!PKP_STRICT_MODE) {
+    class_alias('\APP\plugins\generic\latexConverter\LatexConverterPlugin', '\LatexConverterPlugin');
 }

@@ -14,12 +14,15 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
-use LatexConverterPlugin;
-use NotificationManager;
-use PKPRequest;
-use Services;
-use SubmissionFile;
-use SubmissionFileDAO;
+use APP\core\Application;
+use APP\core\Services;
+use APP\facades\Repo;
+use APP\notification\Notification;
+use APP\notification\NotificationManager;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
+use Exception;
+use PKP\core\PKPRequest;
+use PKP\submissionFile\SubmissionFile;
 
 class ArticleSubmissionFile
 {
@@ -135,17 +138,18 @@ class ArticleSubmissionFile
             'name' => $newFileNameDisplay,
             'submissionId' => $this->submissionId
         ];
-        $submissionFileDao = new SubmissionFileDAO();
-        $newFileObject = $submissionFileDao->newDataObject();
-        $newFileObject->setAllData($newFileParams);
+        $newFileObject = Repo::submissionFile()->newDataObject($newFileParams);
 
-        $newSubmissionFile = Services::get('submissionFile')->add($newFileObject, $this->request);
-        $this->newSubmissionFileId = $newSubmissionFile->getId();
+        try {
+            $this->newSubmissionFileId = Repo::submissionFile()->add($newFileObject);
+        } catch (Exception $ex) {
+            error_log($ex->getMessage());
+        }
 
         if (empty($this->newSubmissionFileId)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                NOTIFICATION_TYPE_ERROR,
+                Notification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred'))
             );
             return false;
@@ -192,19 +196,22 @@ class ArticleSubmissionFile
             $newFileParams = [
                 'fileId' => $newFileId,
                 'assocId' => $this->newSubmissionFileId,
-                'assocType' => ASSOC_TYPE_SUBMISSION_FILE,
-                'fileStage' => SUBMISSION_FILE_DEPENDENT,
+                'assocType' => Application::ASSOC_TYPE_SUBMISSION_FILE,
+                'fileStage' => SubmissionFile::SUBMISSION_FILE_DEPENDENT,
                 'submissionId' => $this->submissionId,
                 'genreId' => $newFileGenreId,
                 'name' => $newFileNameDisplay
             ];
-            $submissionFileDao = new SubmissionFileDAO();
-            $newFileObject = $submissionFileDao->newDataObject();
-            $newFileObject->setAllData($newFileParams);
+            $newFileObject = Repo::submissionFile()->newDataObject($newFileParams);
 
-            $this->newDependentSubmissionFiles[] = Services::get('submissionFile')->add($newFileObject, $this->request);
+            try {
+                $this->newDependentSubmissionFiles[] = Repo::submissionFile()->add($newFileObject);
+            } catch (Exception $ex) {
+                error_log($ex->getMessage());
+            }
         }
 
         return true;
     }
 }
+
