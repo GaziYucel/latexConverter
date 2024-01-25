@@ -1,7 +1,7 @@
 
 # Latex to PDF Converter Plugin
 
-The plugin for OJS 3.3 that allows to convert articles in Latex to PDF format.
+The plugin for OJS 3.3 and 3.4 that allows to convert articles in Latex to PDF format.
 
 -   [Latex to PDF Converter Plugin](#latex-to-pdf-converter-plugin)
 -   [Features](#features)
