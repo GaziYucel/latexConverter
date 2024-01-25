@@ -60,14 +60,19 @@ Clicking this button will do the following:
 
 ### Install with Git
 
+Get the correct version for you OJS version: 
+- branch main: development version, don't use for production
+- branch stable-3_3_0: use this version for OJS version 3.3.0.x
+- branch stable-3_4_0: use this version for OJS version 3.4.0.x
+
 ```shell
-git clone https://github.com/GaziYucel/latexConverter
+git clone -b stable-3_3_0 https://github.com/GaziYucel/latexConverter
 ```
 
 ### Install via direct download
 
-- Download release for your OJS version from https://github.com/TIBHannover/latexConverter/releases
-- Alternatively, download the code with the option 'Download ZIP'. 
+- Download release for your OJS version from https://github.com/TIBHannover/latexConverter/releases. Note the correct version for you OJS version.
+- Alternatively, download the code with the option 'Download ZIP'. Note the correct branch for your OJS version. 
 - Extract the downloaded file to `./plugins/generic/latexConverter`.
 
 ### Install TexLive portable (Linux)
@@ -77,9 +82,10 @@ git clone https://github.com/GaziYucel/latexConverter
 # TexLive will be installed with all packages and options (around 8GB)
 mkdir -p /var/www/TexLive/tmp
 cd /var/www/TexLive/tmp
-wget https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
-zcat < install-tl-unx.tar.gz | tar xf -
-cd install-tl-*
+wget -O install-tl-unx.tar.gz https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
+mkdir install-tl-unx
+tar xf install-tl-unx.tar.gz -C ./install-tl-unx --strip-components=1
+cd install-tl-unx
 perl install-tl --portable --no-interaction --TEXDIR /var/www/TexLive/texmf --TEXMFLOCAL /var/www/TexLive/texmf-local --TEXMFSYSCONFIG /var/www/TexLive/texmf-config --TEXMFSYSVAR /var/www/TexLive/texmf-var
 export PATH=/var/www/TexLive/texmf/bin/x86_64_linux:$PATH
 cd /var/www/TexLive
@@ -90,7 +96,7 @@ rm -rf tmp
 
 ```shell
 cd /path-to-some-latex-project
-/var/www/TexLive/texmf/bin/x86_64_linux/pdflatex -no-shell-escape -interaction=nonstopmode main.tex
+/var/www/TexLive/texmf/bin/x86_64-linux/pdflatex -no-shell-escape -interaction=nonstopmode main.tex
 ```
 
 ### Configuration of the plugin
@@ -98,7 +104,10 @@ cd /path-to-some-latex-project
 - Login in your OJS instance as an Administrator or Manager
 - Navigate to Website > Plugins > Installed Plugins > Generic Plugins > LaTex to PDF Converter Plugin > Settings
 - Fill in the absolute path to pdflatex executable, e.g. /var/www/TexLive/texmf/bin/x86_64-linux/pdflatex
-- Fill in the field "Allowed mime types" with mime types which should show dependent files. For Tex files fill in "text/x-tex" and "application/x-tex" on separate lines
+- Fill in the field "Allowed mime types" with mime types which should show dependent files: 
+  - for TEX files fill in "text/x-tex" and "application/x-tex" on separate lines
+  - for TEXT files, fill in "text/plain"
+  - for PDF files, fill in "application/pdf"
 - Click Save
 
 ![latexConverter - settings](.project/images/latexConverter-settings.gif)
@@ -111,31 +120,33 @@ cd /path-to-some-latex-project
 
 ### Structure
     .
+    ├── assets
+    │   ├── images                        # Images used by the plugin
     ├── classes
-    │   ├── Action                            # Features main classes
-    │   │   ├── Convert.inc.php               # Convert to PDF feature main class
-    │   │   └── Extract.inc.php               # Extract archive feature main class
+    │   ├── Action                        # Features main classes
+    │   │   ├── Convert.php               # Convert to PDF feature main class
+    │   │   └── Extract.php               # Extract archive feature main class
     │   ├── Components
     │   │   └── Forms
-    │   │       └── SettingsForm.inc.php      # Settings form class
+    │   │       └── SettingsForm.php      # Settings form class
     │   ├── Handler
-    │   │   └── PluginHandler.inc.php         # Main plugin handler / controller
-    │   ├── Models                            # Helper classes
-    │   │   ├── ArticleSubmissionFile.inc.php # Add submission files to submission
-    │   │   ├── Cleanup.inc.php               # Cleanup methods
-    │   │   └── Log.php                       # Logging to file methods
-    ├── images                                # Images used by the plugin
-    ├── locale                                # Language files
-    ├── templates                             # Templates folder
-    │   ├── extract.tpl                       # Template for the extract modal
-    │   └── settings.tpl                      # Settings template
-    ├── vendor                                # Composer autoload and dependencies    
-    ├── .gitignore                            # Git ignore file
-    ├── composer.json                         # Composer file, e.g. dependencies, classmap
-    ├── index.php                             # Main entry point of plugin
-    ├── LatexConverterPlugin.inc.php          # Main class of plugin
-    ├── README.md                             # This file
-    └── version.xml                           # Current version of the plugin
+    │   │   └── PluginHandler.php         # Main plugin handler / controller
+    │   └── Helpers                       # Helper classes
+    │       ├── SubmissionFileHelper.php  # Add submission files to submission
+    │       ├── FileSystemHelper.php      # FileSystem methods
+    │       ├── LogHelper.php             # Logging methods
+    │       └── ZipHelper.php             # ZipArchive methods
+    ├── locale                            # Language files
+    ├── templates                         # Templates folder
+    │   ├── extract.tpl                   # Template for the extract modal
+    │   └── settings.tpl                  # Settings template
+    ├── vendor                            # Composer autoload and dependencies    
+    ├── .gitignore                        # Git ignore file
+    ├── composer.json                     # Composer file, e.g. dependencies, classmap
+    ├── index.php                         # Main entry point of plugin
+    ├── LatexConverterPlugin.php          # Main class of plugin
+    ├── README.md                         # This file
+    └── version.xml                       # Current version of the plugin
 
 ### Notes
 

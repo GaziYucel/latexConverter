@@ -4,23 +4,24 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0696d5303e0b54e4c8ddebe750ffb5ad
+class ComposerStaticInit1b66bd88bb6dab52bf3af9b9a16ca7a1
 {
     public static $classMap = array (
+        'APP\\plugins\\generic\\latexConverter\\classes\\Action\\Convert' => __DIR__ . '/../..' . '/classes/Action/Convert.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Action\\Extract' => __DIR__ . '/../..' . '/classes/Action/Extract.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Components\\Forms\\SettingsForm' => __DIR__ . '/../..' . '/classes/Components/Forms/SettingsForm.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\PluginHandler' => __DIR__ . '/../..' . '/classes/Handler/PluginHandler.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\SubmissionFileHelper' => __DIR__ . '/../..' . '/classes/Helpers/SubmissionFileHelper.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\FileSystemHelper' => __DIR__ . '/../..' . '/classes/Helpers/FileSystemHelper.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\LogHelper' => __DIR__ . '/../..' . '/classes/Helpers/LogHelper.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ZipHelper' => __DIR__ . '/../..' . '/classes/Helpers/ZipHelper.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'TIBHannover\\LatexConverter\\Action\\Convert' => __DIR__ . '/../..' . '/classes/Action/Convert.inc.php',
-        'TIBHannover\\LatexConverter\\Action\\Extract' => __DIR__ . '/../..' . '/classes/Action/Extract.inc.php',
-        'TIBHannover\\LatexConverter\\Components\\Forms\\SettingsForm' => __DIR__ . '/../..' . '/classes/Components/Forms/SettingsForm.inc.php',
-        'TIBHannover\\LatexConverter\\Handler\\PluginHandler' => __DIR__ . '/../..' . '/classes/Handler/PluginHandler.inc.php',
-        'TIBHannover\\LatexConverter\\Models\\ArticleSubmissionFile' => __DIR__ . '/../..' . '/classes/Models/ArticleSubmissionFile.inc.php',
-        'TIBHannover\\LatexConverter\\Models\\Cleanup' => __DIR__ . '/../..' . '/classes/Models/Cleanup.inc.php',
-        'TIBHannover\\LatexConverter\\Models\\Log' => __DIR__ . '/../..' . '/classes/Models/Log.inc.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInit0696d5303e0b54e4c8ddebe750ffb5ad::$classMap;
+            $loader->classMap = ComposerStaticInit1b66bd88bb6dab52bf3af9b9a16ca7a1::$classMap;
 
         }, null, ClassLoader::class);
     }

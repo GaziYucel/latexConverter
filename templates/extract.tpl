@@ -1,22 +1,20 @@
 {**
  * templates/extract.tpl
  *
- * Copyright (c) 2014-2019 Simon Fraser University
- * Copyright (c) 2003-2019 John Willinsky
- * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
+ * Copyright (c) 2023+ TIB Hannover
+ * Copyright (c) 2023+ Gazi Yucel
+ * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * Select main file page
  *}
-<script type="text/javascript">
-
+<script>
     $(function() {ldelim}
-        $('#latexConverter_extractForm').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
+        $('#{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}ExtractForm').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
         {rdelim})
-
 </script>
 
 <form class="pkp_form"
-      id="latexConverter_extractForm" method="post"
+      id="{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}ExtractForm" method="post"
       action="{url op="extractExecute"
             submissionId=$submissionId stageId=$stageId fileStage=$fileStage
             submissionFileId=$submissionFileId archiveType=$archiveType}">
