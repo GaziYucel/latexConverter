@@ -131,11 +131,11 @@ cd /path-to-some-latex-project
     │   │       └── SettingsForm.php      # Settings form class
     │   ├── Handler
     │   │   └── PluginHandler.php         # Main plugin handler / controller
-    │   └── Helpers                       # Helper classes
-    │       ├── SubmissionFileHelper.php  # Add submission files to submission
-    │       ├── FileSystemHelper.php      # FileSystem methods
-    │       ├── LogHelper.php             # Logging methods
-    │       └── ZipHelper.php             # ZipArchive methods
+    │   ├── Helpers                       # Helper classes
+    │   │   ├── SubmissionFileHelper.php  # Add submission files to submission
+    │   │   ├── FileSystemHelper.php      # FileSystem methods
+    │   │   ├── LogHelper.php             # Logging methods
+    │   │   └── ZipHelper.php             # ZipArchive methods
     ├── locale                            # Language files
     ├── templates                         # Templates folder
     │   ├── extract.tpl                   # Template for the extract modal
