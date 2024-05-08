@@ -18,7 +18,7 @@
 <version>
 		<application>latexConverter</application>
 		<type>plugins.generic</type>
-		<release>1.1.0.0</release>
+		<release>3.3.0.0</release>
 		<date>2024-01-23</date>
 		<lazy-load>1</lazy-load>
 		<class>LatexConverterPlugin</class>
