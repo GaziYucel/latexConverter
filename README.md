@@ -18,6 +18,9 @@ The plugin for OJS 3.3 and 3.4 that allows to convert articles in Latex to PDF f
     -   [Notes](#notes)
     -   [Classmap](#classmap)
 
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
+
 # Features
 
 ### Extract Archive
