@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Models/SubmissionFileHelper.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class SubmissionFileHelper
@@ -14,14 +14,14 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
-use APP\core\Application;
 use APP\core\Services;
 use APP\facades\Repo;
-use APP\notification\Notification;
 use APP\notification\NotificationManager;
-use APP\plugins\generic\latexConverter\LatexConverterPlugin;
+use APP\plugins\generic\latexConverter\classes\Constants;
 use Exception;
+use PKP\core\PKPApplication;
 use PKP\core\PKPRequest;
+use PKP\notification\PKPNotification;
 use PKP\submissionFile\SubmissionFile;
 
 class SubmissionFileHelper
@@ -69,24 +69,21 @@ class SubmissionFileHelper
     protected string $workingDirAbsolutePath;
 
     /**
-     * Path to directory for files of this submission
-     * e.g. journals/1/articles/51
+     * Path to directory for files of this submission, e.g. journals/1/articles/51
      *
      * @var string
      */
     protected string $submissionFilesRelativeDir;
 
     /**
-     * The name of the main tex file
-     * e.g. main.tex
+     * The name of the main tex file, e.g. main.tex
      *
      * @var string
      */
     protected string $mainFileName = '';
 
     /**
-     * The names of the dependent files
-     * e.g. [ 'image1.png', ... ]
+     * The names of the dependent files, e.g. [ 'image1.png', ... ]
      *
      * @var string[]
      */
@@ -132,7 +129,7 @@ class SubmissionFileHelper
             'assocId' => $this->originalSubmissionFile->getData('assocId'),
             'assocType' => $this->originalSubmissionFile->getData('assocType'),
             'fileStage' => $this->originalSubmissionFile->getData('fileStage'),
-            'mimetype' => LatexConverterPlugin::LATEX_CONVERTER_TEX_FILE_TYPE,
+            'mimetype' => Constants::texFileType,
             'locale' => $this->originalSubmissionFile->getData('locale'),
             'genreId' => $this->originalSubmissionFile->getData('genreId'),
             'name' => $newFileNameDisplay,
@@ -149,7 +146,7 @@ class SubmissionFileHelper
         if (empty($this->newSubmissionFileId)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                Notification::NOTIFICATION_TYPE_ERROR,
+                PKPNotification::NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred'))
             );
             return false;
@@ -160,6 +157,7 @@ class SubmissionFileHelper
 
     /**
      * Add dependent files
+     *
      * @return bool
      */
     public function addDependentFiles(): bool
@@ -182,12 +180,12 @@ class SubmissionFileHelper
             $newFileGenreId = 12; // OTHER
             if (in_array(
                 pathinfo($fileName, PATHINFO_EXTENSION),
-                LatexConverterPlugin::LATEX_CONVERTER_EXTENSIONS['image'])
+                Constants::extensions['image'])
             ) {
                 $newFileGenreId = 10; // IMAGE
             } elseif (in_array(
                 pathinfo($fileName, PATHINFO_EXTENSION),
-                LatexConverterPlugin::LATEX_CONVERTER_EXTENSIONS['style'])
+                Constants::extensions['style'])
             ) {
                 $newFileGenreId = 11; // STYLE
             }
@@ -196,7 +194,7 @@ class SubmissionFileHelper
             $newFileParams = [
                 'fileId' => $newFileId,
                 'assocId' => $this->newSubmissionFileId,
-                'assocType' => Application::ASSOC_TYPE_SUBMISSION_FILE,
+                'assocType' => PKPApplication::ASSOC_TYPE_SUBMISSION_FILE,
                 'fileStage' => SubmissionFile::SUBMISSION_FILE_DEPENDENT,
                 'submissionId' => $this->submissionId,
                 'genreId' => $newFileGenreId,
