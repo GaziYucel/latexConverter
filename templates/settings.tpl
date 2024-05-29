@@ -8,9 +8,9 @@
  * Settings form for the latexConverterSettings plugin.
  *}
 <script>
-	$(function() {
-		$('#{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}Settings').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
-	});
+    $(function () {
+        $('#{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}Settings').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
+    });
 </script>
 
 <form class="pkp_form" method="POST" id="{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}Settings"

@@ -17,7 +17,7 @@ namespace APP\plugins\generic\latexConverter;
 require_once(__DIR__ . '/vendor/autoload.php');
 
 use APP\plugins\generic\latexConverter\classes\Constants;
-use APP\plugins\generic\latexConverter\classes\Handler\LoadHandler;
+use APP\plugins\generic\latexConverter\classes\Handler\PluginHandler;
 use APP\plugins\generic\latexConverter\classes\Settings\Actions;
 use APP\plugins\generic\latexConverter\classes\Settings\Manage;
 use APP\plugins\generic\latexConverter\classes\Settings\MimeTypes;
@@ -36,10 +36,10 @@ class LatexConverterPlugin extends GenericPlugin
     {
         if (parent::register($category, $path, $mainContextId)) {
             if ($this->getEnabled()) {
-                $loadHandler = new LoadHandler();
+                $pluginHandler = new PluginHandler();
                 $links = new Links($this);
                 $mimeTypes = new MimeTypes($this);
-                Hook::add('LoadHandler', [$loadHandler, 'execute']);
+                Hook::add('LoadHandler', [$pluginHandler, 'register']);
                 Hook::add('TemplateManager::fetch', [$links, 'execute']);
                 Hook::add('SubmissionFile::supportsDependentFiles', [$mimeTypes, 'execute']);
 
@@ -88,6 +88,7 @@ class LatexConverterPlugin extends GenericPlugin
 
     /**
      * Overrides parent getSetting
+     *
      * @param $contextId
      * @param $name
      * @return mixed|null
