@@ -26,11 +26,11 @@ class Constants
 
     public const logExtension = 'log';
 
-    public const authorizedRoles = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
-
     public const settingKeyPathExecutable = 'LatexConverter_PathToExecutable';
 
-    public const settingKeySupportsDependentFilesMimeTypes = 'LatexConverter_AuthorisedMimeTypes';
+    public const settingKeyAuthorisedMimeTypes = 'LatexConverter_AuthorisedMimeTypes';
+
+    public const settingDefaultAuthorisedMimeTypes = "application/pdf\napplication/x-tex\ntext/plain\ntext/x-tex";
 
     public const extensions = [
         'tex' => ['tex'],
@@ -43,4 +43,6 @@ class Constants
     ];
 
     public const texMainFilename = 'main.' . self::texExtension;
+
+    public const authorizedRoles = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
 }

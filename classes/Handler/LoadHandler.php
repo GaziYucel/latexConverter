@@ -9,6 +9,7 @@
  * @class LoadHandler
  * @brief LoadHandler
  */
+
 namespace APP\plugins\generic\latexConverter\classes\Handler;
 
 class LoadHandler

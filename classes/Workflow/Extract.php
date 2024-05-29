@@ -31,7 +31,6 @@ use PrivateFileManager;
 use Services;
 use SubmissionDAO;
 use TemplateManager;
-use ZipArchive;
 use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
 use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
 

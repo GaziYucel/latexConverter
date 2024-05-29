@@ -12,14 +12,14 @@
  * @brief Plugin LatexConverter
  */
 
+require_once(__DIR__ . '/vendor/autoload.php');
+
 use APP\plugins\generic\latexConverter\classes\Constants;
 use APP\plugins\generic\latexConverter\classes\Handler\LoadHandler;
 use APP\plugins\generic\latexConverter\classes\Settings\Actions;
 use APP\plugins\generic\latexConverter\classes\Settings\Manage;
 use APP\plugins\generic\latexConverter\classes\Settings\MimeTypes;
 use APP\plugins\generic\latexConverter\classes\Workflow\Links;
-
-require_once(__DIR__ . '/vendor/autoload.php');
 
 import('lib.pkp.classes.plugins.GenericPlugin');
 import('lib.pkp.classes.linkAction.request.OpenWindowAction');
@@ -30,81 +30,80 @@ define('LATEX_CONVERTER_PLUGIN_NAME', basename(__FILE__, '.php'));
 
 class LatexConverterPlugin extends GenericPlugin
 {
-	/**
-	 * @copydoc Plugin::register
-	 */
-	function register($category, $path, $mainContextId = null): bool
-	{
-		if (parent::register($category, $path, $mainContextId)) {
-			if ($this->getEnabled()) {
-				$loadHandler = new LoadHandler();
-				$links = new Links($this);
-				$mimeTypes = new MimeTypes($this);
-				HookRegistry::register('LoadHandler', [$loadHandler, 'execute']);
-				HookRegistry::register('TemplateManager::fetch', [$links, 'execute']);
-				HookRegistry::register('SubmissionFile::supportsDependentFiles', [$mimeTypes, 'execute']);
+    /** @copydoc Plugin::register */
+    function register($category, $path, $mainContextId = null): bool
+    {
+        if (parent::register($category, $path, $mainContextId)) {
+            if ($this->getEnabled()) {
+                $loadHandler = new LoadHandler();
+                $links = new Links($this);
+                $mimeTypes = new MimeTypes($this);
+                HookRegistry::register('LoadHandler', [$loadHandler, 'execute']);
+                HookRegistry::register('TemplateManager::fetch', [$links, 'execute']);
+                HookRegistry::register('SubmissionFile::supportsDependentFiles', [$mimeTypes, 'execute']);
 
-				$this->_registerTemplateResource();
-			}
+                $this->_registerTemplateResource();
+            }
 
-			return true;
-		}
+            return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	/** @copydoc Plugin::getActions() */
-	public function getActions($request, $actionArgs): array
-	{
-		if (!$this->getEnabled()) return parent::getActions($request, $actionArgs);
+    /** @copydoc Plugin::getActions() */
+    public function getActions($request, $actionArgs): array
+    {
+        if (!$this->getEnabled()) return parent::getActions($request, $actionArgs);
 
-		$actions = new Actions($this);
-		return $actions->execute($request, $actionArgs, parent::getActions($request, $actionArgs));
-	}
+        $actions = new Actions($this);
+        return $actions->execute($request, $actionArgs, parent::getActions($request, $actionArgs));
+    }
 
-	/** @copydoc Plugin::manage() */
-	public function manage($args, $request): JSONMessage
-	{
-		$manage = new Manage($this);
-		return $manage->execute($args, $request);
-	}
+    /** @copydoc Plugin::manage() */
+    public function manage($args, $request): JSONMessage
+    {
+        $manage = new Manage($this);
+        return $manage->execute($args, $request);
+    }
 
-	/* Plugin required methods */
+    /* Plugin required methods */
 
-	/**
-	 * @copydoc PKPPlugin::getDisplayName
-	 */
-	public function getDisplayName(): string
-	{
-		return __('plugins.generic.latexConverter.displayName');
-	}
+    /**
+     * @copydoc PKPPlugin::getDisplayName
+     */
+    public function getDisplayName(): string
+    {
+        return __('plugins.generic.latexConverter.displayName');
+    }
 
-	/**
-	 * @copydoc PKPPlugin::getDescription
-	 */
-	public function getDescription(): string
-	{
-		return __('plugins.generic.latexConverter.description');
-	}
+    /**
+     * @copydoc PKPPlugin::getDescription
+     */
+    public function getDescription(): string
+    {
+        return __('plugins.generic.latexConverter.description');
+    }
 
-	/**
-	 * Overrides parent getSetting
-	 * @param $contextId
-	 * @param $name
-	 * @return mixed|null
-	 */
-	public function getSetting($contextId, $name): mixed
-	{
-		switch ($name) {
-			case Constants::settingKeyPathExecutable:
-				$config_value = Config::getVar('latex', 'latexExe');
-				break;
-			default:
-				return parent::getSetting($contextId, $name);
-		}
+    /**
+     * Overrides parent getSetting
+     *
+     * @param $contextId
+     * @param $name
+     * @return mixed|null
+     */
+    public function getSetting($contextId, $name): mixed
+    {
+        switch ($name) {
+            case Constants::settingKeyPathExecutable:
+                $config_value = Config::getVar('latex', 'latexExe');
+                break;
+            default:
+                return parent::getSetting($contextId, $name);
+        }
 
-		return $config_value ?: parent::getSetting($contextId, $name);
-	}
+        return $config_value ?: parent::getSetting($contextId, $name);
+    }
 }
 
 class_alias('\LatexConverterPlugin', '\APP\plugins\generic\latexConverter\LatexConverterPlugin');
