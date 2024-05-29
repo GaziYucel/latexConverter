@@ -33,8 +33,8 @@
         <p>
             {fbvElement
             type="textarea"
-            id="{APP\plugins\generic\latexConverter\classes\Constants::settingKeySupportsDependentFilesMimeTypes}"
-            value=${APP\plugins\generic\latexConverter\classes\Constants::settingKeySupportsDependentFilesMimeTypes}
+            id="{APP\plugins\generic\latexConverter\classes\Constants::settingKeyAuthorisedMimeTypes}"
+            value=${APP\plugins\generic\latexConverter\classes\Constants::settingKeyAuthorisedMimeTypes}
             label="plugins.generic.latexConverter.settings.authorised_mime_types.label"
             }
         </p>
@@ -44,3 +44,4 @@
 
     {fbvFormButtons submitText="common.save"}
 </form>
+

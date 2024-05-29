@@ -37,3 +37,4 @@
     {fbvFormButtons submitText="plugins.generic.latexConverter.modal.extract.button"}
 
 </form>
+

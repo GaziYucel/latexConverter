@@ -38,7 +38,7 @@ class SettingsForm extends Form
      * @var string[]
      */
     private array $settings = [
-        Constants::settingKeySupportsDependentFilesMimeTypes,
+        Constants::settingKeyAuthorisedMimeTypes,
         Constants::settingKeyPathExecutable
     ];
 
@@ -134,10 +134,16 @@ class SettingsForm extends Form
             : Application::CONTEXT_SITE;
 
         foreach ($this->settings as $key) {
+            $data = $this->getData($key);
+
+            if ($key === Constants::settingKeyAuthorisedMimeTypes) {
+                if (empty($data)) $data = Constants::settingDefaultAuthorisedMimeTypes;
+            }
+
             $this->plugin->updateSetting(
                 $contextId,
                 $key,
-                $this->getData($key)
+                $data
             );
         }
 
