@@ -46,4 +46,3 @@ class Constants
 
     public const authorizedRoles = [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT];
 }
-

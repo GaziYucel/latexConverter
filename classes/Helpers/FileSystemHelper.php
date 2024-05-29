@@ -57,13 +57,13 @@ class FileSystemHelper
     {
         $files = [];
 
-        if(empty($path) || !file_exists($path)) return $files;
+        if (empty($path) || !file_exists($path)) return $files;
 
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
 
-        foreach($iterator as $file){
-            if(!is_dir($file)){
+        foreach ($iterator as $file) {
+            if (!is_dir($file)) {
                 $files[] = $file->getPathname();
             }
         }
