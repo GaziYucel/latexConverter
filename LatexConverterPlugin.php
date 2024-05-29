@@ -31,9 +31,7 @@ define('LATEX_CONVERTER_PLUGIN_NAME', basename(__FILE__, '.php'));
 
 class LatexConverterPlugin extends GenericPlugin
 {
-    /**
-     * @copydoc Plugin::register
-     */
+    /** @copydoc Plugin::register */
     function register($category, $path, $mainContextId = null): bool
     {
         if (parent::register($category, $path, $mainContextId)) {

@@ -30,7 +30,7 @@ class Constants
 
     public const settingKeyAuthorisedMimeTypes = 'LatexConverter_AuthorisedMimeTypes';
 
-    public const settingDefaultAuthorisedMimeTypes = "text/x-tex\napplication/x-tex\napplication/pdf\ntext/plain";
+    public const settingDefaultAuthorisedMimeTypes = "application/pdf\napplication/x-tex\ntext/plain\ntext/x-tex";
 
     public const extensions = [
         'tex' => ['tex'],
