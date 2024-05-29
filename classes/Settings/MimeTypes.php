@@ -47,7 +47,7 @@ class MimeTypes
 
         $allowedMimetypes = ['text/x-tex', 'application/x-tex'];
         $allowedMimetypesDb = $this->plugin->getSetting($this->plugin->getCurrentContextId(),
-            Constants::settingKeySupportsDependentFilesMimeTypes);
+            Constants::settingKeyAuthorisedMimeTypes);
         if (!empty($allowedMimetypesDb))
             $allowedMimetypes = array_filter(preg_split("/\r\n|\n|\r/", $allowedMimetypesDb));
 
