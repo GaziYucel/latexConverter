@@ -8,9 +8,9 @@
  * Select main file page
  *}
 <script>
-	$(function() {
-		$('#{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}ExtractForm').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
-	});
+    $(function () {
+        $('#{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}ExtractForm').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
+    });
 </script>
 
 <form class="pkp_form" method="post" id="{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}ExtractForm"
