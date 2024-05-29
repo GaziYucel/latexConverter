@@ -7,14 +7,20 @@ namespace Composer\Autoload;
 class ComposerStaticInit1b66bd88bb6dab52bf3af9b9a16ca7a1
 {
     public static $classMap = array (
-        'APP\\plugins\\generic\\latexConverter\\classes\\Action\\Convert' => __DIR__ . '/../..' . '/classes/Action/Convert.php',
-        'APP\\plugins\\generic\\latexConverter\\classes\\Action\\Extract' => __DIR__ . '/../..' . '/classes/Action/Extract.php',
-        'APP\\plugins\\generic\\latexConverter\\classes\\Components\\Forms\\SettingsForm' => __DIR__ . '/../..' . '/classes/Components/Forms/SettingsForm.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Constants' => __DIR__ . '/../..' . '/classes/Constants.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\LoadHandler' => __DIR__ . '/../..' . '/classes/Handler/LoadHandler.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\PluginHandler' => __DIR__ . '/../..' . '/classes/Handler/PluginHandler.php',
-        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\SubmissionFileHelper' => __DIR__ . '/../..' . '/classes/Helpers/SubmissionFileHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\FileSystemHelper' => __DIR__ . '/../..' . '/classes/Helpers/FileSystemHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\LogHelper' => __DIR__ . '/../..' . '/classes/Helpers/LogHelper.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\SubmissionFileHelper' => __DIR__ . '/../..' . '/classes/Helpers/SubmissionFileHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ZipHelper' => __DIR__ . '/../..' . '/classes/Helpers/ZipHelper.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Settings\\Actions' => __DIR__ . '/../..' . '/classes/Settings/Actions.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Settings\\Manage' => __DIR__ . '/../..' . '/classes/Settings/Manage.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Settings\\MimeTypes' => __DIR__ . '/../..' . '/classes/Settings/MimeTypes.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Settings\\SettingsForm' => __DIR__ . '/../..' . '/classes/Settings/SettingsForm.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Workflow\\Convert' => __DIR__ . '/../..' . '/classes/Workflow/Convert.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Workflow\\Extract' => __DIR__ . '/../..' . '/classes/Workflow/Extract.php',
+        'APP\\plugins\\generic\\latexConverter\\classes\\Workflow\\Links' => __DIR__ . '/../..' . '/classes/Workflow/Links.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 

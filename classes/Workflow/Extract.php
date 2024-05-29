@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Action/Extract.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class Extract
@@ -13,12 +13,13 @@
  *
  */
 
-namespace APP\plugins\generic\latexConverter\classes\Action;
+namespace APP\plugins\generic\latexConverter\classes\Workflow;
 
 import('lib.pkp.classes.file.PrivateFileManager');
 import('lib.pkp.classes.submission.GenreDAO');
 import('lib.pkp.classes.form.Form');
 
+use APP\plugins\generic\latexConverter\classes\Constants;
 use APP\plugins\generic\latexConverter\classes\Helpers\ZipHelper;
 use Exception;
 use Form;
@@ -36,88 +37,71 @@ use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
 
 class Extract extends Form
 {
-    /**
-     * @var LatexConverterPlugin
-     */
+    /** @var LatexConverterPlugin */
     protected LatexConverterPlugin $plugin;
 
-    /**
-     * @var PrivateFileManager
-     */
+    /** @var PrivateFileManager */
     protected PrivateFileManager $fileManager;
 
-    /**
-     * @var NotificationManager
-     */
+    /** @var NotificationManager */
     protected NotificationManager $notificationManager;
 
-    /**
-     * @var mixed Request
-     */
+    /** @var mixed Request */
     protected mixed $request;
 
-    /**
-     * @var object Submission
-     */
+    /** @var object Submission */
     protected object $submission;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected string $timeStamp;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     protected int $submissionId;
 
-    /**
-     * @var object SubmissionFile
-     */
+    /** @var object SubmissionFile */
     protected object $submissionFile;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     protected int $submissionFileId;
 
     /**
-     * Absolute path to the archive file
-     * e.g. /var/www/ojs_files/journals/1/articles/51/648b243110d7e.zip
+     * Absolute path to the archive file, e.g. /var/www/ojs_files/journals/1/articles/51/648b243110d7e.zip
+     *
      * @var string
      */
     protected string $archiveFileAbsolutePath;
 
     /**
-     * Absolute path to the directory with the extracted content of archive
-     * e.g. /var/tmp/648b243110d7e_zip_extracted
+     * Absolute path to the directory with the extracted content of archive, e.g. /var/tmp/648b243110d7e_zip_extracted
+     *
      * @var string
      */
     protected string $workingDirAbsolutePath;
 
     /**
-     * Path to directory for files of this submission
-     * e.g. journals/1/articles/51
+     * Path to directory for files of this submission, e.g. journals/1/articles/51
+     *
      * @var string
      */
     protected string $submissionFilesRelativeDir;
 
     /**
-     * The name of the main tex file
-     * e.g. main.tex
+     * The name of the main tex file, e.g. main.tex
+     *
      * @var string
      */
     protected string $mainFileName = '';
 
     /**
-     * The names of the dependent files
-     * e.g. [ 'image1.png', ... ]
+     * The names of the dependent files, e.g. [ 'image1.png', ... ]
+     *
      * @var string[]
      */
     protected array $dependentFileNames = [];
 
     /**
      * Name used for id in form
+     *
      * @var string
      */
     protected string $latexConverterSelectedFilenameKey = 'latexConverter_SelectedFilename';
@@ -185,6 +169,8 @@ class Extract extends Form
 
     /**
      * Assign form data to user-submitted data.
+     *
+     * @return void
      */
     function readInputData(): void
     {
@@ -210,11 +196,11 @@ class Extract extends Form
         }
 
         // check archive type, if not zip return false
-        if ($this->request->getUserVar("archiveType") !== LatexConverterPlugin::LATEX_CONVERTER_ZIP_FILE_TYPE) {
+        if ($this->request->getUserVar("archiveType") !== Constants::zipFileType) {
             $this->notificationManager
                 ->createTrivialNotification(
                     $this->request->getUser()->getId(),
-                    Notification::NOTIFICATION_TYPE_ERROR,
+                    NOTIFICATION_TYPE_ERROR,
                     array('contents' => __('plugins.generic.latexConverter.notification.noValidZipFile'))
                 );
 
@@ -225,7 +211,7 @@ class Extract extends Form
         if (!ZipHelper::extractZip($this->archiveFileAbsolutePath, $this->workingDirAbsolutePath)) {
             $this->notificationManager->createTrivialNotification(
                 $this->request->getUser()->getId(),
-                Notification::NOTIFICATION_TYPE_ERROR,
+                NOTIFICATION_TYPE_ERROR,
                 array('contents' => __('plugins.generic.latexConverter.notification.errorOpeningFile')));
 
             return $this->defaultResponse();
@@ -274,8 +260,8 @@ class Extract extends Form
     }
 
     /**
-     * Default response
-     * Only submissionId is returned as a JSONMessage
+     * Default response, only submissionId is returned as a JSONMessage
+     *
      * @param bool $status
      * @return JSONMessage
      */

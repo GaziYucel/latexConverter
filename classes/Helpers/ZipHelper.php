@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Helpers/ZipHelper.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class ZipHelper
@@ -14,14 +14,14 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
-use LatexConverterPlugin;
+use APP\plugins\generic\latexConverter\classes\Constants;
 use ZipArchive;
 
 class ZipHelper
 {
-    protected static string $mainTexFileName = LatexConverterPlugin::LATEX_CONVERTER_TEX_MAIN_FILENAME;
+    protected static string $texMainFilename = Constants::texMainFilename;
 
-    protected static string $texExtension = LatexConverterPlugin::LATEX_CONVERTER_TEX_EXTENSION;
+    protected static string $texExtension = Constants::texExtension;
 
     /**
      * Return root folder of a ZIP with subdirectories
@@ -38,9 +38,11 @@ class ZipHelper
         if (!$zip->open($path)) return $local;
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
-            if ($i === 0 && substr($zip->statIndex($i)['name'], -1) === DIRECTORY_SEPARATOR) {
+            if ($i === 0
+                && substr($zip->statIndex($i)['name'], -1) === DIRECTORY_SEPARATOR) {
                 $local = $zip->statIndex($i)['name'];
-            } else if (substr($zip->statIndex($i - 1)['name'], -1) === DIRECTORY_SEPARATOR
+            } else if ($i > 0
+                && substr($zip->statIndex($i - 1)['name'], -1) === DIRECTORY_SEPARATOR
                 && substr($zip->statIndex($i)['name'], -1) === DIRECTORY_SEPARATOR) {
                 $local = $zip->statIndex($i)['name'];
             }
@@ -95,16 +97,14 @@ class ZipHelper
             $stat = $zip->statIndex($i);
             $name = str_replace($relativeZipRoot, '', $stat['name']);
 
-            if(!empty($name) && !str_contains($name, DIRECTORY_SEPARATOR)){
+            if (!empty($name) && !str_contains($name, DIRECTORY_SEPARATOR)) {
                 // set main.tex first in list
-                if ($name === self::$mainTexFileName) {
+                if ($name === self::$texMainFilename) {
                     array_unshift($texFiles, $name);
-                }
-                // set *.tex 2+ in list
+                } // set *.tex 2+ in list
                 else if (pathinfo($name, PATHINFO_EXTENSION) === self::$texExtension) {
                     $texFiles[] = $name;
-                }
-                // set other files after tex files
+                } // set other files after tex files
                 else if (!empty(pathinfo($name, PATHINFO_EXTENSION))) {
                     $otherFiles[] = $name;
                 }

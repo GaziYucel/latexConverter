@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Helpers/FileSystemHelper.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class FileSystemHelper
@@ -59,7 +59,8 @@ class FileSystemHelper
 
         if(empty($path) || !file_exists($path)) return $files;
 
-        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS));
 
         foreach($iterator as $file){
             if(!is_dir($file)){

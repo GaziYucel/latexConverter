@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Action/Convert.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class Convert
@@ -12,85 +12,69 @@
  * @brief Action Convert for the Handler
  */
 
-namespace APP\plugins\generic\latexConverter\classes\Action;
+namespace APP\plugins\generic\latexConverter\classes\Workflow;
 
-import('lib.pkp.classes.file.PrivateFileManager');
-
+use NotificationManager;
+use APP\plugins\generic\latexConverter\classes\Constants;
 use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
+use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use Config;
 use JSONMessage;
-use LatexConverterPlugin;
-use NotificationManager;
+use PKPApplication;
 use PKPRequest;
 use PrivateFileManager;
+use PKPNotification;
 use Services;
 use SubmissionDAO;
-use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
+use SubmissionFile;
 
 class Convert
 {
-    /**
-     * @var LatexConverterPlugin
-     */
+    /** @var LatexConverterPlugin */
     protected LatexConverterPlugin $plugin;
 
-    /**
-     * @var PrivateFileManager
-     */
+    /** @var PrivateFileManager */
     protected PrivateFileManager $fileManager;
 
-    /**
-     * @var NotificationManager
-     */
+    /** @var NotificationManager */
     protected NotificationManager $notificationManager;
 
-    /**
-     * @var mixed Request
-     */
+    /** @var mixed Request */
     protected mixed $request;
 
-    /**
-     * @var object Submission
-     */
+    /** @var object Submission */
     protected object $submission;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected string $timeStamp;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     protected int $submissionId;
 
-    /**
-     * @var object SubmissionFile
-     */
+    /** @var object SubmissionFile */
     protected object $submissionFile;
 
-    /**
-     * @var int
-     */
+    /** @var int */
     protected int $submissionFileId;
 
     /**
-     * Absolute path to the work directory
-     * e.g. /tmp/latexConverter_20230701_150101
+     * Absolute path to the work directory, e.g. /tmp/latexConverter_20230701_150101
+     *
      * @var string
      */
     protected string $workingDirAbsolutePath;
 
     /**
-     * Path to directory for files of this submission
-     * e.g. journals/1/articles/51
+     * Path to directory for files of this submission, e.g. journals/1/articles/51
+     *
      * @var string
      */
     protected string $submissionFilesRelativeDir;
 
     /**
-     * Absolute path to ojs files directory
-     * e.g. /var/www/ojs_files
+     * Absolute path to ojs files directory, e.g. /var/www/ojs_files
+     *
      * @var string
      */
     protected string $ojsFilesAbsoluteBaseDir;
@@ -110,35 +94,36 @@ class Convert
     protected array $submissionFileDependents;
 
     /**
-     * The name of the main tex file
-     * e.g. main.tex
+     * The name of the main tex file, e.g. main.tex
+     *
      * @var string
      */
     protected string $mainFileName = '';
 
     /**
-     * The names of the dependent files
-     * e.g. [ 'image1.png', ... ]
+     * The names of the dependent files, e.g. [ 'image1.png', ... ]
+     *
      * @var string[]
      */
     protected array $dependentFileNames = [];
 
     /**
-     * Generated PDF file
-     * e.g. main.pdf
+     * Generated PDF file, e.g. main.pdf
+     *
      * @var string
      */
     protected string $pdfFile = '';
 
     /**
-     * Name of the log file
-     * e.g. main.log
+     * Name of the log file, e.g. main.log
+     *
      * @var string
      */
     protected string $logFile = '';
 
     /**
      * Absolute path to the latex executable
+     *
      * @var string
      */
     protected string $latexExe = '';
@@ -159,11 +144,11 @@ class Convert
         $this->mainFileName =
             $this->submissionFile->getData('name')[$this->submissionFile->getData('locale')];
 
-        $this->pdfFile = str_replace('.' . LatexConverterPlugin::LATEX_CONVERTER_TEX_EXTENSION,
-            '.' . LatexConverterPlugin::LATEX_CONVERTER_PDF_EXTENSION, $this->mainFileName);
+        $this->pdfFile = str_replace('.' . Constants::texExtension,
+            '.' . Constants::pdfExtension, $this->mainFileName);
 
-        $this->logFile = str_replace('.' . LatexConverterPlugin::LATEX_CONVERTER_TEX_EXTENSION,
-            '.' . LatexConverterPlugin::LATEX_CONVERTER_LOG_EXTENSION, $this->mainFileName);
+        $this->logFile = str_replace('.' . Constants::texExtension,
+            '.' . Constants::logExtension, $this->mainFileName);
 
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
         $submissionDao = new SubmissionDAO();
@@ -178,11 +163,12 @@ class Convert
         $this->ojsFilesAbsoluteBaseDir = Config::getVar('files', 'files_dir');
 
         $this->latexExe = $this->plugin->getSetting($this->request->getContext()->getId(),
-            LatexConverterPlugin::LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE);
+            Constants::settingKeyPathExecutable);
     }
 
     /**
      * Main entry point
+     *
      * @return JSONMessage
      */
     public function process(): JSONMessage
@@ -244,13 +230,13 @@ class Convert
         // check if pdf file exists and add this as main file
         if (file_exists($this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $this->pdfFile)) {
             if (!$this->addFiles($this->pdfFile,
-                str_replace('.' . LatexConverterPlugin::LATEX_CONVERTER_TEX_EXTENSION,
+                str_replace('.' . Constants::texExtension,
                     '', $this->mainFileName)))
                 return $this->defaultResponse();
         } // no pdf file found, check if log file exists and add this as main file
         elseif (file_exists($this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $this->logFile)) {
             if (!$this->addFiles($this->logFile,
-                str_replace('.' . LatexConverterPlugin::LATEX_CONVERTER_TEX_EXTENSION,
+                str_replace('.' . Constants::texExtension,
                     '', $this->mainFileName)))
                 return $this->defaultResponse();
         } else {
@@ -261,6 +247,11 @@ class Convert
         return $this->defaultResponse(true);
     }
 
+    /**
+     * Gets and returns the main file
+     *
+     * @return bool
+     */
     private function getSubmissionFileMain(): bool
     {
         $this->submissionFileMain[] =

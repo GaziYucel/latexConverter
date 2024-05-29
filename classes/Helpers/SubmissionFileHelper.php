@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Models/SubmissionFileHelper.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class SubmissionFileHelper
@@ -14,7 +14,7 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
-use LatexConverterPlugin;
+use APP\plugins\generic\latexConverter\classes\Constants;
 use NotificationManager;
 use PKPRequest;
 use Services;
@@ -66,24 +66,21 @@ class SubmissionFileHelper
     protected string $workingDirAbsolutePath;
 
     /**
-     * Path to directory for files of this submission
-     * e.g. journals/1/articles/51
+     * Path to directory for files of this submission, e.g. journals/1/articles/51
      *
      * @var string
      */
     protected string $submissionFilesRelativeDir;
 
     /**
-     * The name of the main tex file
-     * e.g. main.tex
+     * The name of the main tex file, e.g. main.tex
      *
      * @var string
      */
     protected string $mainFileName = '';
 
     /**
-     * The names of the dependent files
-     * e.g. [ 'image1.png', ... ]
+     * The names of the dependent files, e.g. [ 'image1.png', ... ]
      *
      * @var string[]
      */
@@ -129,7 +126,7 @@ class SubmissionFileHelper
             'assocId' => $this->originalSubmissionFile->getData('assocId'),
             'assocType' => $this->originalSubmissionFile->getData('assocType'),
             'fileStage' => $this->originalSubmissionFile->getData('fileStage'),
-            'mimetype' => LatexConverterPlugin::LATEX_CONVERTER_TEX_FILE_TYPE,
+            'mimetype' => Constants::texFileType,
             'locale' => $this->originalSubmissionFile->getData('locale'),
             'genreId' => $this->originalSubmissionFile->getData('genreId'),
             'name' => $newFileNameDisplay,
@@ -156,6 +153,7 @@ class SubmissionFileHelper
 
     /**
      * Add dependent files
+     *
      * @return bool
      */
     public function addDependentFiles(): bool
@@ -178,12 +176,12 @@ class SubmissionFileHelper
             $newFileGenreId = 12; // OTHER
             if (in_array(
                 pathinfo($fileName, PATHINFO_EXTENSION),
-                LatexConverterPlugin::LATEX_CONVERTER_EXTENSIONS['image'])
+                Constants::extensions['image'])
             ) {
                 $newFileGenreId = 10; // IMAGE
             } elseif (in_array(
                 pathinfo($fileName, PATHINFO_EXTENSION),
-                LatexConverterPlugin::LATEX_CONVERTER_EXTENSIONS['style'])
+                Constants::extensions['style'])
             ) {
                 $newFileGenreId = 11; // STYLE
             }
@@ -208,3 +206,4 @@ class SubmissionFileHelper
         return true;
     }
 }
+

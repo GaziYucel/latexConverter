@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Models/LogHelper.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class LogHelper
