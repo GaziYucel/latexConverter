@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/SettingsForm.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class SettingsForm
@@ -12,16 +12,18 @@
  * @brief Form for journal managers to configure the latexConverter plugin
  */
 
-namespace APP\plugins\generic\latexConverter\classes\Components\Forms;
+namespace APP\plugins\generic\latexConverter\classes\Settings;
 
 use APP\core\Application;
 use APP\notification\Notification;
 use APP\notification\NotificationManager;
+use APP\plugins\generic\latexConverter\classes\Constants;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use APP\template\TemplateManager;
+use PKP\core\PKPApplication;
 use PKP\form\Form;
 use PKP\form\validation\FormValidatorCSRF;
 use PKP\form\validation\FormValidatorPost;
-use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 
 class SettingsForm extends Form
 {
@@ -36,18 +38,18 @@ class SettingsForm extends Form
      * @var string[]
      */
     private array $settings = [
-        LatexConverterPlugin::LATEX_CONVERTER_SETTING_KEY_SUPPORTS_DEPENDENT_FILES_MIME_TYPES,
-        LatexConverterPlugin::LATEX_CONVERTER_SETTING_KEY_PATH_EXECUTABLE
+        Constants::settingKeySupportsDependentFilesMimeTypes,
+        Constants::settingKeyPathExecutable
     ];
 
     /**
      * @copydoc Form::__construct()
      */
-    public function __construct(LatexConverterPlugin $plugin)
+    public function __construct(LatexConverterPlugin &$plugin)
     {
         parent::__construct($plugin->getTemplateResource('settings.tpl'));
 
-        $this->plugin = $plugin;
+        $this->plugin = &$plugin;
 
         $this->addCheck(new FormValidatorPost($this));
         $this->addCheck(new FormValidatorCSRF($this));
@@ -67,7 +69,7 @@ class SettingsForm extends Form
 
         $contextId = $context
             ? $context->getId()
-            : Application::CONTEXT_SITE;
+            : PKPApplication::CONTEXT_SITE;
 
         foreach ($this->settings as $key) {
             $this->setData(

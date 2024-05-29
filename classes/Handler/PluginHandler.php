@@ -3,7 +3,7 @@
  * @file plugins/generic/latexConverter/classes/Handler/LatexConverterHandler.php
  *
  * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yucel
+ * Copyright (c) 2023+ Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class LatexConverterHandler
@@ -14,14 +14,15 @@
 
 namespace APP\plugins\generic\latexConverter\classes\Handler;
 
-use APP\core\Application;
 use APP\handler\Handler;
+use APP\plugins\generic\latexConverter\classes\Constants;
+use APP\plugins\generic\latexConverter\classes\Workflow\Convert;
+use APP\plugins\generic\latexConverter\classes\Workflow\Extract;
+use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use PKP\core\JSONMessage;
+use PKP\core\PKPApplication;
 use PKP\plugins\PluginRegistry;
 use PKP\security\authorization\WorkflowStageAccessPolicy;
-use APP\plugins\generic\latexConverter\LatexConverterPlugin;
-use APP\plugins\generic\latexConverter\classes\Action\Convert;
-use APP\plugins\generic\latexConverter\classes\Action\Extract;
 
 class PluginHandler extends Handler
 {
@@ -32,6 +33,7 @@ class PluginHandler extends Handler
 
     /**
      * List of methods allowed
+     *
      * @var array|string[]
      */
     protected array $allowedMethods = ['extractShow', 'extractExecute', 'convert'];
@@ -45,13 +47,14 @@ class PluginHandler extends Handler
         $this->plugin = $plugin;
 
         $this->addRoleAssignment(
-            LatexConverterPlugin::LATEX_CONVERTER_AUTHORIZED_ROLES,
+            Constants::authorizedRoles,
             $this->allowedMethods
         );
     }
 
     /**
      * Overridden method from Handler
+     *
      * @copydoc PKPHandler::authorize()
      */
     function authorize($request, &$args, $roleAssignments): bool
@@ -71,6 +74,7 @@ class PluginHandler extends Handler
 
     /**
      * Extracts file and adds to files list
+     *
      * @param $args
      * @param $request
      * @return JSONMessage
@@ -86,6 +90,7 @@ class PluginHandler extends Handler
 
     /**
      * Create article from selected main file
+     *
      * @param $args
      * @param $request
      * @return JSONMessage JSON object
@@ -101,7 +106,7 @@ class PluginHandler extends Handler
         return $request->redirectUrlJson(
             $request->getDispatcher()->url(
                 $request,
-                Application::ROUTE_PAGE,
+                PKPApplication::ROUTE_PAGE,
                 null,
                 'workflow',
                 'access',
@@ -116,6 +121,7 @@ class PluginHandler extends Handler
 
     /**
      * Converts LaTex file to pdf
+     *
      * @param $args
      * @param $request
      * @return JSONMessage
