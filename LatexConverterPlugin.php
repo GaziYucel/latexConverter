@@ -15,7 +15,7 @@
 require_once(__DIR__ . '/vendor/autoload.php');
 
 use APP\plugins\generic\latexConverter\classes\Constants;
-use APP\plugins\generic\latexConverter\classes\Handler\LoadHandler;
+use APP\plugins\generic\latexConverter\classes\Handler\PluginHandler;
 use APP\plugins\generic\latexConverter\classes\Settings\Actions;
 use APP\plugins\generic\latexConverter\classes\Settings\Manage;
 use APP\plugins\generic\latexConverter\classes\Settings\MimeTypes;
@@ -35,10 +35,10 @@ class LatexConverterPlugin extends GenericPlugin
     {
         if (parent::register($category, $path, $mainContextId)) {
             if ($this->getEnabled()) {
-                $loadHandler = new LoadHandler();
+                $pluginHandler = new PluginHandler();
                 $links = new Links($this);
                 $mimeTypes = new MimeTypes($this);
-                HookRegistry::register('LoadHandler', [$loadHandler, 'execute']);
+                HookRegistry::register('LoadHandler', [$pluginHandler, 'register']);
                 HookRegistry::register('TemplateManager::fetch', [$links, 'execute']);
                 HookRegistry::register('SubmissionFile::supportsDependentFiles', [$mimeTypes, 'execute']);
 

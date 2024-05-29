@@ -55,6 +55,31 @@ class PluginHandler extends Handler
     }
 
     /**
+     * Register PluginHandler
+     *
+     * @param $hookName string
+     * @param $args array Hook arguments [&$page, &$op, &$sourceFile]
+     * @return bool
+     */
+    public function register(string $hookName, array $args): bool
+    {
+        $page = $args[0];
+        $op = $args[1];
+
+        switch ("$page/$op") {
+            case "latexConverter/extractShow":
+            case "latexConverter/extractExecute":
+            case "latexConverter/convert":
+                define('HANDLER_CLASS', '\APP\plugins\generic\latexConverter\classes\Handler\PluginHandler');
+                return true;
+            default:
+                break;
+        }
+
+        return false;
+    }
+
+    /**
      * Overridden method from Handler
      *
      * @copydoc PKPHandler::authorize()
