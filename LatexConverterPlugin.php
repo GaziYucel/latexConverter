@@ -15,7 +15,6 @@
 require_once(__DIR__ . '/vendor/autoload.php');
 
 use APP\plugins\generic\latexConverter\classes\Constants;
-use APP\plugins\generic\latexConverter\classes\Handler\PluginHandler;
 use APP\plugins\generic\latexConverter\classes\Settings\Actions;
 use APP\plugins\generic\latexConverter\classes\Settings\Manage;
 use APP\plugins\generic\latexConverter\classes\Settings\MimeTypes;
@@ -35,10 +34,9 @@ class LatexConverterPlugin extends GenericPlugin
     {
         if (parent::register($category, $path, $mainContextId)) {
             if ($this->getEnabled()) {
-                $pluginHandler = new PluginHandler();
                 $links = new Links($this);
                 $mimeTypes = new MimeTypes($this);
-                HookRegistry::register('LoadHandler', [$pluginHandler, 'register']);
+                HookRegistry::register('LoadHandler', [$this, 'registerHandler']);
                 HookRegistry::register('TemplateManager::fetch', [$links, 'execute']);
                 HookRegistry::register('SubmissionFile::supportsDependentFiles', [$mimeTypes, 'execute']);
 
@@ -46,6 +44,25 @@ class LatexConverterPlugin extends GenericPlugin
             }
 
             return true;
+        }
+
+        return false;
+    }
+
+    /** Register PluginHandler */
+    public function registerHandler(string $hookName, array $args): bool
+    {
+        $page = $args[0];
+        $op = $args[1];
+
+        switch ("$page/$op") {
+            case "latexConverter/extractShow":
+            case "latexConverter/extractExecute":
+            case "latexConverter/convert":
+                define('HANDLER_CLASS', '\APP\plugins\generic\latexConverter\classes\Handler\PluginHandler');
+                return true;
+            default:
+                break;
         }
 
         return false;
@@ -67,31 +84,19 @@ class LatexConverterPlugin extends GenericPlugin
         return $manage->execute($args, $request);
     }
 
-    /* Plugin required methods */
-
-    /**
-     * @copydoc PKPPlugin::getDisplayName
-     */
+    /** @copydoc PKPPlugin::getDisplayName */
     public function getDisplayName(): string
     {
         return __('plugins.generic.latexConverter.displayName');
     }
 
-    /**
-     * @copydoc PKPPlugin::getDescription
-     */
+    /** @copydoc PKPPlugin::getDescription */
     public function getDescription(): string
     {
         return __('plugins.generic.latexConverter.description');
     }
 
-    /**
-     * Overrides parent getSetting
-     *
-     * @param $contextId
-     * @param $name
-     * @return mixed|null
-     */
+    /** @copydoc PKPPlugin::getSetting */
     public function getSetting($contextId, $name): mixed
     {
         switch ($name) {

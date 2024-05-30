@@ -105,17 +105,17 @@ class Extract extends Form
      */
     protected string $latexConverterSelectedFilenameKey = 'latexConverter_SelectedFilename';
 
-    function __construct(LatexConverterPlugin $plugin, PKPRequest $request, $args)
+    function __construct(LatexConverterPlugin &$plugin)
     {
         $this->timeStamp = date('Ymd_His');
 
-        $this->plugin = $plugin;
+        $this->plugin = &$plugin;
 
         $this->fileManager = new PrivateFileManager();
 
         $this->notificationManager = new NotificationManager();
 
-        $this->request = $request;
+        $this->request = $this->plugin->getRequest();
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
         $this->submissionFile = Services::get('submissionFile')->get($this->submissionFileId);

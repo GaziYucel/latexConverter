@@ -21,13 +21,9 @@ use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
 use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use Config;
 use JSONMessage;
-use PKPApplication;
-use PKPRequest;
 use PrivateFileManager;
-use PKPNotification;
 use Services;
 use SubmissionDAO;
-use SubmissionFile;
 
 class Convert
 {
@@ -128,15 +124,15 @@ class Convert
      */
     protected string $latexExe = '';
 
-    function __construct(LatexConverterPlugin $plugin, PKPRequest $request, $args)
+    function __construct(LatexConverterPlugin &$plugin)
     {
         $this->timeStamp = date('Ymd_His');
 
-        $this->plugin = $plugin;
+        $this->plugin = &$plugin;
 
         $this->notificationManager = new NotificationManager();
 
-        $this->request = $request;
+        $this->request = $this->plugin->getRequest();
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
         $this->submissionFile = Services::get('submissionFile')->get($this->submissionFileId);

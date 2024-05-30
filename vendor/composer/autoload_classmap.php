@@ -7,10 +7,8 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'APP\\plugins\\generic\\latexConverter\\classes\\Constants' => $baseDir . '/classes/Constants.php',
-    'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\LoadHandler' => $baseDir . '/classes/Handler/LoadHandler.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\PluginHandler' => $baseDir . '/classes/Handler/PluginHandler.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\FileSystemHelper' => $baseDir . '/classes/Helpers/FileSystemHelper.php',
-    'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\LogHelper' => $baseDir . '/classes/Helpers/LogHelper.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\SubmissionFileHelper' => $baseDir . '/classes/Helpers/SubmissionFileHelper.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ZipHelper' => $baseDir . '/classes/Helpers/ZipHelper.php',
     'APP\\plugins\\generic\\latexConverter\\classes\\Settings\\Actions' => $baseDir . '/classes/Settings/Actions.php',
