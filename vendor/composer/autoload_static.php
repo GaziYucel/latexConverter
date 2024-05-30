@@ -8,10 +8,8 @@ class ComposerStaticInit1b66bd88bb6dab52bf3af9b9a16ca7a1
 {
     public static $classMap = array (
         'APP\\plugins\\generic\\latexConverter\\classes\\Constants' => __DIR__ . '/../..' . '/classes/Constants.php',
-        'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\LoadHandler' => __DIR__ . '/../..' . '/classes/Handler/LoadHandler.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Handler\\PluginHandler' => __DIR__ . '/../..' . '/classes/Handler/PluginHandler.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\FileSystemHelper' => __DIR__ . '/../..' . '/classes/Helpers/FileSystemHelper.php',
-        'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\LogHelper' => __DIR__ . '/../..' . '/classes/Helpers/LogHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\SubmissionFileHelper' => __DIR__ . '/../..' . '/classes/Helpers/SubmissionFileHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Helpers\\ZipHelper' => __DIR__ . '/../..' . '/classes/Helpers/ZipHelper.php',
         'APP\\plugins\\generic\\latexConverter\\classes\\Settings\\Actions' => __DIR__ . '/../..' . '/classes/Settings/Actions.php',

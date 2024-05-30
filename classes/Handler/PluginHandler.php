@@ -26,16 +26,10 @@ use PKP\security\authorization\WorkflowStageAccessPolicy;
 
 class PluginHandler extends Handler
 {
-    /**
-     * @var LatexConverterPlugin
-     */
+    /** @var LatexConverterPlugin */
     protected LatexConverterPlugin $plugin;
 
-    /**
-     * List of methods allowed
-     *
-     * @var array|string[]
-     */
+    /** @var array|string[] List of methods allowed */
     protected array $allowedMethods = ['extractShow', 'extractExecute', 'convert'];
 
     function __construct()
@@ -44,55 +38,23 @@ class PluginHandler extends Handler
 
         /* @var LatexConverterPlugin $plugin */
         $plugin = PluginRegistry::getPlugin('generic', strtolower(LATEX_CONVERTER_PLUGIN_NAME));
-        $this->plugin = $plugin;
+        $this->plugin = &$plugin;
 
-        $this->addRoleAssignment(
-            Constants::authorizedRoles,
-            $this->allowedMethods
-        );
+        $this->addRoleAssignment(Constants::authorizedRoles, $this->allowedMethods);
     }
 
-    /**
-     * Register PluginHandler
-     *
-     * @param $hookName string
-     * @param $args array Hook arguments [&$page, &$op, &$sourceFile]
-     * @return bool
-     */
-    public function register(string $hookName, array $args): bool
-    {
-        $page = $args[0];
-        $op = $args[1];
-
-        switch ("$page/$op") {
-            case "latexConverter/extractShow":
-            case "latexConverter/extractExecute":
-            case "latexConverter/convert":
-                define('HANDLER_CLASS', '\APP\plugins\generic\latexConverter\classes\Handler\PluginHandler');
-                return true;
-            default:
-                break;
-        }
-
-        return false;
-    }
-
-    /**
-     * Overridden method from Handler
-     *
-     * @copydoc PKPHandler::authorize()
-     */
+    /** @copydoc PKPHandler::authorize() */
     function authorize($request, &$args, $roleAssignments): bool
     {
-        $this->addPolicy(
-            new WorkflowStageAccessPolicy(
-                $request,
-                $args,
-                $roleAssignments,
-                'submissionId',
-                (int)$request->getUserVar('stageId')
-            )
+        $policy = new WorkflowStageAccessPolicy(
+            $request,
+            $args,
+            $roleAssignments,
+            'submissionId',
+            (int)$request->getUserVar('stageId')
         );
+
+        $this->addPolicy($policy);
 
         return parent::authorize($request, $args, $roleAssignments);
     }
@@ -106,10 +68,8 @@ class PluginHandler extends Handler
      */
     public function extractShow($args, $request): JSONMessage
     {
-        $action = new Extract($this->plugin, $request, $args);
-
+        $action = new Extract($this->plugin);
         $action->initData();
-
         return new JSONMessage(true, $action->fetch($request));
     }
 
@@ -122,12 +82,9 @@ class PluginHandler extends Handler
      */
     public function extractExecute($args, $request): JSONMessage
     {
-        $action = new Extract($this->plugin, $request, $args);
-
+        $action = new Extract($this->plugin);
         $action->readInputData();
-
         $action->process();
-
         return $request->redirectUrlJson(
             $request->getDispatcher()->url(
                 $request,
@@ -153,8 +110,7 @@ class PluginHandler extends Handler
      */
     public function convert($args, $request): JSONMessage
     {
-        $action = new Convert($this->plugin, $request, $args);
-
+        $action = new Convert($this->plugin);
         return $action->process();
     }
 }

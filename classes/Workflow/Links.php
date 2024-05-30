@@ -100,22 +100,27 @@ class Links
                         $row->addAction(
                             new LinkAction(
                                 'latexconverter_extract_zip',
-                                new AjaxModal(
-                                    $path,
-                                    __('plugins.generic.latexConverter.modal.extract.title')
-                                ),
+                                new AjaxModal($path, __('plugins.generic.latexConverter.modal.extract.title')),
                                 __('plugins.generic.latexConverter.button.extract'),
                                 null
                             )
                         );
-
                     } // only show link if file is tex and is not dependent file (assocId is null)
                     elseif (strtolower($fileExtension) == Constants::texFileType
                         && empty($submissionFile->getData('assocId'))) {
+                        $disableLink = false;
+                        $latexExe = $this->plugin->getSetting(
+                            $this->plugin->getRequest()->getContext()->getId(),
+                            Constants::settingKeyPathExecutable);
 
-                        $disableLink = true;
-                        $linkText = $this->getConvertButton();
-                        if ($linkText === 'plugins.generic.latexConverter.button.convert') $disableLink = false;
+                        $linkText = 'plugins.generic.latexConverter.button.convert';
+                        if (strlen($latexExe) == 0) {
+                            $linkText = 'plugins.generic.latexConverter.executable.notConfigured';
+                            $disableLink = true;
+                        } elseif (!is_executable($latexExe)) {
+                            $linkText = 'plugins.generic.latexConverter.executable.notFound';
+                            $disableLink = true;
+                        }
 
                         $path = $dispatcher->url(
                             $request,
@@ -140,24 +145,5 @@ class Links
                 }
             }
         }
-    }
-
-    /**
-     * Converter button depending on the latex executable status
-     *
-     * @return  string
-     */
-    public function getConvertButton(): string
-    {
-        $latexExe = $this->plugin->getSetting($this->plugin->getRequest()->getContext()->getId(),
-            Constants::settingKeyPathExecutable);
-
-        if (strlen($latexExe) == 0) {
-            return 'plugins.generic.latexConverter.executable.notConfigured';
-        } elseif (!is_executable($latexExe)) {
-            return 'plugins.generic.latexConverter.executable.notFound';
-        }
-
-        return 'plugins.generic.latexConverter.button.convert';
     }
 }
