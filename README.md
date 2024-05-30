@@ -170,5 +170,3 @@ Example:
 ```
 
 You can find more information about classmap [here](https://getcomposer.org/doc/04-schema.md#classmap).
-
-...
