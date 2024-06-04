@@ -40,7 +40,7 @@ class PluginHandler extends Handler
         $plugin = PluginRegistry::getPlugin('generic', strtolower(LATEX_CONVERTER_PLUGIN_NAME));
         $this->plugin = &$plugin;
 
-        $this->addRoleAssignment(Constants::authorizedRoles, $this->allowedMethods);
+        $this->addRoleAssignment(Constants::AUTHORISED_ROLES, $this->allowedMethods);
     }
 
     /** @copydoc PKPHandler::authorize() */
