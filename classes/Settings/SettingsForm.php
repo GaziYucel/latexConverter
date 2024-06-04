@@ -36,8 +36,8 @@ class SettingsForm extends Form
      * @var string[]
      */
     private array $settings = [
-        Constants::settingKeyAuthorisedMimeTypes,
-        Constants::settingKeyPathExecutable
+        Constants::SETTING_AUTHORISED_MIME_TYPES,
+        Constants::SETTING_LATEX_PATH_EXECUTABLE
     ];
 
     /**
@@ -61,21 +61,15 @@ class SettingsForm extends Form
      */
     public function initData(): void
     {
-        $context = Application::get()
-            ->getRequest()
-            ->getContext();
+        $context = Application::get()->getRequest()->getContext();
 
         $contextId = $context
             ? $context->getId()
             : CONTEXT_SITE;
 
         foreach ($this->settings as $key) {
-            $this->setData(
-                $key,
-                $this->plugin->getSetting(
-                    $contextId,
-                    $key
-                )
+            $this->setData($key,
+                $this->plugin->getSetting($contextId, $key)
             );
         }
 
@@ -123,25 +117,17 @@ class SettingsForm extends Form
      */
     public function execute(...$functionArgs): mixed
     {
-        $context = Application::get()
-            ->getRequest()
-            ->getContext();
+        $context = Application::get()->getRequest()->getContext();
 
         $contextId = $context
             ? $context->getId()
             : CONTEXT_SITE;
 
         foreach ($this->settings as $key) {
-            $data = $this->getData($key);
-
-            if ($key === Constants::settingKeyAuthorisedMimeTypes) {
-                if (empty($data)) $data = Constants::settingDefaultAuthorisedMimeTypes;
-            }
-
             $this->plugin->updateSetting(
                 $contextId,
                 $key,
-                $data
+                $this->getData($key)
             );
         }
 

@@ -26,10 +26,8 @@ use Form;
 use JSONMessage;
 use LatexConverterPlugin;
 use NotificationManager;
-use PKPRequest;
 use PrivateFileManager;
 use Services;
-use SubmissionDAO;
 use TemplateManager;
 use APP\plugins\generic\latexConverter\classes\Helpers\SubmissionFileHelper;
 use APP\plugins\generic\latexConverter\classes\Helpers\FileSystemHelper;
@@ -121,8 +119,7 @@ class Extract extends Form
         $this->submissionFile = Services::get('submissionFile')->get($this->submissionFileId);
 
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
-        $submissionDao = new SubmissionDAO();
-        $this->submission = $submissionDao->getById($this->submissionId);
+        $this->submission = Services::get('submission')->get($this->submissionId);
 
         $this->archiveFileAbsolutePath = $this->fileManager->getBasePath() . DIRECTORY_SEPARATOR .
             $this->submissionFile->getData('path');
@@ -195,7 +192,7 @@ class Extract extends Form
         }
 
         // check archive type, if not zip return false
-        if ($this->request->getUserVar("archiveType") !== Constants::zipFileType) {
+        if ($this->request->getUserVar("archiveType") !== Constants::ZIP_FILE_TYPE) {
             $this->notificationManager
                 ->createTrivialNotification(
                     $this->request->getUser()->getId(),

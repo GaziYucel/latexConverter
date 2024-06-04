@@ -21,7 +21,8 @@ msgid "plugins.generic.latexConverter.settings.path_executable.label"
 msgstr "Absolute path to LaTex executable. e.g $MY_FOLDER/TexLive/texmf/bin/x86_64-linux/pdflatex"
 
 msgid "plugins.generic.latexConverter.settings.authorised_mime_types.label"
-msgstr "Allowed mimetypes. One mimetype per line, e.g. text/x-tex"
+msgstr "Allowed mimetypes. One mimetype per line, "
+"e.g.<br/>application/pdf<br/>application/x-tex<br/>text/plain<br/>text/x-tex"
 
 msgid "plugins.generic.latexConverter.button.extract"
 msgstr "Extract Archive"

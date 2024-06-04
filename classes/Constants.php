@@ -16,23 +16,21 @@ use Role;
 
 class Constants
 {
-    public const zipFileType = 'application/zip';
+    public const ZIP_FILE_TYPE = 'application/zip';
 
-    public const texFileType = 'text/x-tex';
+    public const TEX_FILE_TYPE = 'text/x-tex';
 
-    public const texExtension = 'tex';
+    public const TEX_EXTENSION = 'tex';
 
-    public const pdfExtension = 'pdf';
+    public const PDF_EXTENSION = 'pdf';
 
-    public const logExtension = 'log';
+    public const LOG_EXTENSION = 'log';
 
-    public const settingKeyPathExecutable = 'LatexConverter_PathToExecutable';
+    public const SETTING_LATEX_PATH_EXECUTABLE = 'LatexConverter_PathToExecutable';
 
-    public const settingKeyAuthorisedMimeTypes = 'LatexConverter_AuthorisedMimeTypes';
+    public const SETTING_AUTHORISED_MIME_TYPES = 'LatexConverter_AuthorisedMimeTypes';
 
-    public const settingDefaultAuthorisedMimeTypes = "application/pdf\napplication/x-tex\ntext/plain\ntext/x-tex";
-
-    public const extensions = [
+    public const EXTENSIONS = [
         'tex' => ['tex'],
         'pdf' => ['pdf'],
         'log' => ['log'],
@@ -42,7 +40,7 @@ class Constants
         'style' => ['css']
     ];
 
-    public const texMainFilename = 'main.' . self::texExtension;
+    public const TEX_MAIN_FILENAME = 'main.' . self::TEX_EXTENSION;
 
-    public const authorizedRoles = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
+    public const AUTHORISED_ROLES = [ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT];
 }

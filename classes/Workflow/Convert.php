@@ -23,7 +23,6 @@ use Config;
 use JSONMessage;
 use PrivateFileManager;
 use Services;
-use SubmissionDAO;
 
 class Convert
 {
@@ -140,15 +139,14 @@ class Convert
         $this->mainFileName =
             $this->submissionFile->getData('name')[$this->submissionFile->getData('locale')];
 
-        $this->pdfFile = str_replace('.' . Constants::texExtension,
-            '.' . Constants::pdfExtension, $this->mainFileName);
+        $this->pdfFile = str_replace('.' . Constants::TEX_EXTENSION,
+            '.' . Constants::PDF_EXTENSION, $this->mainFileName);
 
-        $this->logFile = str_replace('.' . Constants::texExtension,
-            '.' . Constants::logExtension, $this->mainFileName);
+        $this->logFile = str_replace('.' . Constants::TEX_EXTENSION,
+            '.' . Constants::LOG_EXTENSION, $this->mainFileName);
 
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
-        $submissionDao = new SubmissionDAO();
-        $this->submission = $submissionDao->getById($this->submissionId);
+        $this->submission = Services::get('submission')->get($this->submissionId);
 
         $this->workingDirAbsolutePath = sys_get_temp_dir() . DIRECTORY_SEPARATOR .
             LATEX_CONVERTER_PLUGIN_NAME . '_' . $this->timeStamp . '_' . uniqid();
@@ -159,7 +157,7 @@ class Convert
         $this->ojsFilesAbsoluteBaseDir = Config::getVar('files', 'files_dir');
 
         $this->latexExe = $this->plugin->getSetting($this->request->getContext()->getId(),
-            Constants::settingKeyPathExecutable);
+            Constants::SETTING_LATEX_PATH_EXECUTABLE);
     }
 
     /**
@@ -226,14 +224,12 @@ class Convert
         // check if pdf file exists and add this as main file
         if (file_exists($this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $this->pdfFile)) {
             if (!$this->addFiles($this->pdfFile,
-                str_replace('.' . Constants::texExtension,
-                    '', $this->mainFileName)))
+                str_replace('.' . Constants::TEX_EXTENSION, '', $this->mainFileName)))
                 return $this->defaultResponse();
         } // no pdf file found, check if log file exists and add this as main file
         elseif (file_exists($this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $this->logFile)) {
             if (!$this->addFiles($this->logFile,
-                str_replace('.' . Constants::texExtension,
-                    '', $this->mainFileName)))
+                str_replace('.' . Constants::TEX_EXTENSION, '', $this->mainFileName)))
                 return $this->defaultResponse();
         } else {
             return $this->defaultResponse();

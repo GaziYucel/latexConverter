@@ -58,7 +58,7 @@ class Links
                 $isAuthorized = false;
                 foreach ($roles as $role) {
                     if (in_array($role->getId(),
-                        Constants::authorizedRoles)) {
+                        Constants::AUTHORISED_ROLES)) {
                         $isAuthorized = true;
                         break;
                     }
@@ -73,7 +73,7 @@ class Links
                         'submissionId' => $submissionId,
                         'submissionFileId' => $submissionFile->getId(),
                         'stageId' => $stageId,
-                        'archiveType' => Constants::zipFileType);
+                        'archiveType' => Constants::ZIP_FILE_TYPE);
 
                     $pathRedirect = $dispatcher->url(
                         $request,
@@ -85,7 +85,7 @@ class Links
                     );
 
                     // only show link if file is zip
-                    if (strtolower($fileExtension) == Constants::zipFileType) {
+                    if (strtolower($fileExtension) == Constants::ZIP_FILE_TYPE) {
                         $path = $dispatcher->url(
                             $request,
                             ROUTE_PAGE,
@@ -105,12 +105,12 @@ class Links
                             )
                         );
                     } // only show link if file is tex and is not dependent file (assocId is null)
-                    elseif (strtolower($fileExtension) == Constants::texFileType
+                    elseif (strtolower($fileExtension) == Constants::TEX_FILE_TYPE
                         && empty($submissionFile->getData('assocId'))) {
                         $disableLink = false;
                         $latexExe = $this->plugin->getSetting(
                             $this->plugin->getRequest()->getContext()->getId(),
-                            Constants::settingKeyPathExecutable);
+                            Constants::SETTING_LATEX_PATH_EXECUTABLE);
 
                         $linkText = 'plugins.generic.latexConverter.button.convert';
                         if (strlen($latexExe) == 0) {

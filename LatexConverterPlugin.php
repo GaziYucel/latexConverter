@@ -71,8 +71,6 @@ class LatexConverterPlugin extends GenericPlugin
     /** @copydoc Plugin::getActions() */
     public function getActions($request, $actionArgs): array
     {
-        if (!$this->getEnabled()) return parent::getActions($request, $actionArgs);
-
         $actions = new Actions($this);
         return $actions->execute($request, $actionArgs, parent::getActions($request, $actionArgs));
     }
@@ -100,7 +98,7 @@ class LatexConverterPlugin extends GenericPlugin
     public function getSetting($contextId, $name): mixed
     {
         switch ($name) {
-            case Constants::settingKeyPathExecutable:
+            case Constants::SETTING_LATEX_PATH_EXECUTABLE:
                 $config_value = Config::getVar('latex', 'latexExe');
                 break;
             default:

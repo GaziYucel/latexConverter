@@ -29,8 +29,6 @@ class Manage
     /** @copydoc Plugin::manage() */
     public function execute($args, $request): JSONMessage
     {
-        $context = $request->getContext();
-
         switch ($request->getUserVar('verb')) {
             case 'settings':
                 // Load the custom form

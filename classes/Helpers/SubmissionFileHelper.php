@@ -126,7 +126,7 @@ class SubmissionFileHelper
             'assocId' => $this->originalSubmissionFile->getData('assocId'),
             'assocType' => $this->originalSubmissionFile->getData('assocType'),
             'fileStage' => $this->originalSubmissionFile->getData('fileStage'),
-            'mimetype' => Constants::texFileType,
+            'mimetype' => Constants::TEX_FILE_TYPE,
             'locale' => $this->originalSubmissionFile->getData('locale'),
             'genreId' => $this->originalSubmissionFile->getData('genreId'),
             'name' => $newFileNameDisplay,
@@ -176,12 +176,12 @@ class SubmissionFileHelper
             $newFileGenreId = 12; // OTHER
             if (in_array(
                 pathinfo($fileName, PATHINFO_EXTENSION),
-                Constants::extensions['image'])
+                Constants::EXTENSIONS['image'])
             ) {
                 $newFileGenreId = 10; // IMAGE
             } elseif (in_array(
                 pathinfo($fileName, PATHINFO_EXTENSION),
-                Constants::extensions['style'])
+                Constants::EXTENSIONS['style'])
             ) {
                 $newFileGenreId = 11; // STYLE
             }
