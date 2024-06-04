@@ -26,7 +26,6 @@ use APP\plugins\generic\latexConverter\LatexConverterPlugin;
 use APP\template\TemplateManager;
 use Exception;
 use PKP\core\JSONMessage;
-use PKP\core\PKPRequest;
 use PKP\file\PrivateFileManager;
 use PKP\form\Form;
 
@@ -115,6 +114,7 @@ class Extract extends Form
 
         $this->submissionFileId = (int)$this->request->getUserVar('submissionFileId');
         $this->submissionFile = Repo::submissionFile()->get($this->submissionFileId);
+
         $this->submissionId = (int)$this->submissionFile->getData('submissionId');
         $this->submission = Repo::submission()->get($this->submissionId);
 
@@ -189,7 +189,7 @@ class Extract extends Form
         }
 
         // check archive type, if not zip return false
-        if ($this->request->getUserVar("archiveType") !== Constants::zipFileType) {
+        if ($this->request->getUserVar("archiveType") !== Constants::ZIP_FILE_TYPE) {
             $this->notificationManager
                 ->createTrivialNotification(
                     $this->request->getUser()->getId(),

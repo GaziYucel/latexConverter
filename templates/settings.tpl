@@ -24,8 +24,8 @@
         <p>
             {fbvElement
             type="text"
-            id="{APP\plugins\generic\latexConverter\classes\Constants::settingKeyPathExecutable}"
-            value=${APP\plugins\generic\latexConverter\classes\Constants::settingKeyPathExecutable}
+            id="{APP\plugins\generic\latexConverter\classes\Constants::SETTING_LATEX_PATH_EXECUTABLE}"
+            value=${APP\plugins\generic\latexConverter\classes\Constants::SETTING_LATEX_PATH_EXECUTABLE}
             label="plugins.generic.latexConverter.settings.path_executable.label"
             required="true"
             }
@@ -33,8 +33,8 @@
         <p>
             {fbvElement
             type="textarea"
-            id="{APP\plugins\generic\latexConverter\classes\Constants::settingKeyAuthorisedMimeTypes}"
-            value=${APP\plugins\generic\latexConverter\classes\Constants::settingKeyAuthorisedMimeTypes}
+            id="{APP\plugins\generic\latexConverter\classes\Constants::SETTING_AUTHORISED_MIME_TYPES}"
+            value=${APP\plugins\generic\latexConverter\classes\Constants::SETTING_AUTHORISED_MIME_TYPES}
             label="plugins.generic.latexConverter.settings.authorised_mime_types.label"
             }
         </p>

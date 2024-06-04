@@ -19,10 +19,6 @@ use ZipArchive;
 
 class ZipHelper
 {
-    protected static string $texMainFilename = Constants::texMainFilename;
-
-    protected static string $texExtension = Constants::texExtension;
-
     /**
      * Return root folder of a ZIP with subdirectories
      *
@@ -99,10 +95,10 @@ class ZipHelper
 
             if (!empty($name) && !str_contains($name, DIRECTORY_SEPARATOR)) {
                 // set main.tex first in list
-                if ($name === self::$texMainFilename) {
+                if ($name === Constants::TEX_MAIN_FILENAME) {
                     array_unshift($texFiles, $name);
                 } // set *.tex 2+ in list
-                else if (pathinfo($name, PATHINFO_EXTENSION) === self::$texExtension) {
+                else if (pathinfo($name, PATHINFO_EXTENSION) === Constants::TEX_EXTENSION) {
                     $texFiles[] = $name;
                 } // set other files after tex files
                 else if (!empty(pathinfo($name, PATHINFO_EXTENSION))) {
