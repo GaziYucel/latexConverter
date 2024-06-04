@@ -138,25 +138,29 @@ cd /path-to-some-latex-project
     ├── templates                         # Templates folder
     │   ├── extract.tpl                   # Template for the extract modal
     │   └── settings.tpl                  # Settings template
-    ├── vendor                            # Composer autoload and dependencies    
+    ├── vendor                            # Composer autoload and dependencies (ojs 3.3.0)
     ├── .gitignore                        # Git ignore file
-    ├── composer.json                     # Composer file, e.g. dependencies, classmap
-    ├── index.php                         # Main entry point of plugin
+    ├── composer.json                     # Composer file, e.g. dependencies, classmap (ojs 3.3.0)
+    ├── index.php                         # Main entry point of plugin (ojs 3.3.0)
     ├── LatexConverterPlugin.php          # Main class of plugin
     ├── README.md                         # This file
     └── version.xml                       # Current version of the plugin
 
 ### Notes
 
-- Auto loading of the classes in the folder `classes` is done with composer classmap ([see below](#classmap)).
-- If you add or remove classes in this folder, run the following command to update the autoload
-  files: `composer dump-autoload -o`.
-- Running `composer install -o` or `composer update -o` will also generate the autoload files
-- The `-o` option generates the optimised files ready for production.
+- OJS 3.3.0
+    - Loading of the classes in the folder `classes` is done with composer classmap ([see below](#classmap)).
+    - If you add or remove classes in this folder, run the following command to update the autoload
+      files: `composer dump-autoload -o`.
+    - Running `composer install -o` or `composer update -o` will also generate the autoload files
+    - The `-o` option generates the optimised files ready for production.
+- OJS 3.4.0+
+    - Loading of classes depends on PSR-4.
+    - No composer.json file or vendor directory is needed.
 
 ### Classmap
 
-You can use the classmap generation support to define autoloading for all libraries that do not follow PSR-0/4. To
+You can use the classmap generation support to define loading for all libraries that do not follow PSR-0/4. To
 configure this you specify all directories or files to search for classes.
 
 Example:
