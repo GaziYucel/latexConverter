@@ -69,10 +69,9 @@ Get the correct version for you OJS version:
 - branch main: development version, don't use for production
 - branch stable-3_3_0: use this version for OJS version 3.3.0.x
 - branch stable-3_4_0: use this version for OJS version 3.4.0.x
-- branch stable-3_5_0: use this version for OJS version 3.5.0.x
 
 ```shell
-git clone -b stable-3_5_0 https://github.com/GaziYucel/latexConverter
+git clone -b stable-3_4_0 https://github.com/GaziYucel/latexConverter
 ```
 
 ### Install via direct download
