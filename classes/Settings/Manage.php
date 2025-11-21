@@ -1,12 +1,16 @@
 <?php
+
 /**
  * @file classes/Settings/Manage.php
  *
- * @copyright (c) 2021+ TIB Hannover
- * @copyright (c) 2021+ Gazi Yücel
+ * @copyright (c) 2021-2025 TIB Hannover
+ * @copyright (c) 2021-2025 Gazi Yücel
  * @license Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class Manage
+ *
+ * @ingroup plugins_generic_latexconverter
+ *
  * @brief Manage settings page
  */
 
@@ -17,13 +21,11 @@ use PKP\core\JSONMessage;
 
 class Manage
 {
-    /** @var LatexConverterPlugin */
     public LatexConverterPlugin $plugin;
 
-    /** @param LatexConverterPlugin $plugin */
-    public function __construct(LatexConverterPlugin &$plugin)
+    public function __construct(LatexConverterPlugin $plugin)
     {
-        $this->plugin = &$plugin;
+        $this->plugin = $plugin;
     }
 
     /** @copydoc Plugin::manage() */

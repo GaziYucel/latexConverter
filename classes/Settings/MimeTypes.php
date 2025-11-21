@@ -1,12 +1,16 @@
 <?php
+
 /**
  * @file classes/Settings/MimeTypes.php
  *
- * @copyright (c) 2021+ TIB Hannover
- * @copyright (c) 2021+ Gazi Yücel
+ * @copyright (c) 2021-2025 TIB Hannover
+ * @copyright (c) 2021-2025 Gazi Yücel
  * @license Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class Production
+ *
+ * @ingroup plugins_generic_latexconverter
+ *
  * @brief Production
  */
 
@@ -18,21 +22,15 @@ use PKP\submissionFile\SubmissionFile;
 
 class MimeTypes
 {
-    /** @var LatexConverterPlugin */
     public LatexConverterPlugin $plugin;
 
-    /** @param LatexConverterPlugin $plugin */
-    public function __construct(LatexConverterPlugin &$plugin)
+    public function __construct(LatexConverterPlugin $plugin)
     {
-        $this->plugin = &$plugin;
+        $this->plugin = $plugin;
     }
 
     /**
-     * Add mimetypes which support dependent files
-     *
-     * @param $hookName string
-     * @param $args array Hook arguments [&$result, $submissionFile]
-     * @return void
+     * Add mimetypes which support dependent files.
      */
     public function execute(string $hookName, array $args): void
     {

@@ -1,12 +1,14 @@
 <?php
+
 /**
  * @file plugins/generic/latexConverter/classes/Helpers/ZipHelper.php
  *
- * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yücel
+ * @copyright (c) 2021-2025 TIB Hannover
+ * @copyright (c) 2021-2025 Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class ZipHelper
+ *
  * @ingroup plugins_generic_latexconverter
  *
  * @brief ZipHelper
@@ -20,10 +22,7 @@ use ZipArchive;
 class ZipHelper
 {
     /**
-     * Return root folder of a ZIP with subdirectories
-     *
-     * @param string $path
-     * @return string
+     * Return root folder of a ZIP with subdirectories.
      */
     public static function getRelativeZipRoot(string $path): string
     {
@@ -31,7 +30,9 @@ class ZipHelper
 
         $zip = new ZipArchive();
 
-        if (!$zip->open($path)) return $local;
+        if (!$zip->open($path)) {
+            return $local;
+        }
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
             if ($i === 0
@@ -44,40 +45,41 @@ class ZipHelper
             }
         }
 
-        if ($zip->status) $zip->close();
+        if ($zip->status) {
+            $zip->close();
+        }
 
         return $local;
     }
 
     /**
-     * Extract zip file
-     *
-     * @param string $path
-     * @param string $extractToPath
-     * @return bool
+     * Extract zip file.
      */
     public static function extractZip(string $path, string $extractToPath): bool
     {
         $zip = new ZipArchive();
 
-        if (!$zip->open($path)) return false;
+        if (!$zip->open($path)) {
+            return false;
+        }
 
-        if (!mkdir($extractToPath, 0777, true)) return false;
+        if (!mkdir($extractToPath, 0777, true)) {
+            return false;
+        }
 
         $zip->extractTo($extractToPath);
 
-        if ($zip->status) $zip->close();
+        if ($zip->status) {
+            $zip->close();
+        }
 
         return true;
     }
 
     /**
-     * Get list of filenames of zip file
-     * Only the files in root folder are returned, subdirectories are ignored
+     * Get list of filenames of zip file.
+     * Only the files in root folder are returned, subdirectories are ignored.
      * e.g. [ 'main.tex', '*.tex'..., 'other'... ]
-     *
-     * @param string $zipPath
-     * @return array
      */
     public static function getZipContentTexFilesFirst(string $zipPath): array
     {
@@ -87,7 +89,10 @@ class ZipHelper
         $relativeZipRoot = self::getRelativeZipRoot($zipPath);
 
         $zip = new ZipArchive();
-        if (!$zip->open($zipPath)) return [];
+
+        if (!$zip->open($zipPath)) {
+            return [];
+        }
 
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $stat = $zip->statIndex($i);
@@ -107,8 +112,24 @@ class ZipHelper
             }
         }
 
-        if ($zip->status) $zip->close();
+        if ($zip->status) {
+            $zip->close();
+        }
 
         return array_merge($texFiles, $otherFiles);
+    }
+
+    /**
+     * Check if a file is an zip archive
+     */
+    public static function isZipArchive(string $path): bool
+    {
+        $zip = new ZipArchive;
+        if ($zip->open($path) === true) {
+            $zip->close();
+            return true;
+        }
+
+        return false;
     }
 }

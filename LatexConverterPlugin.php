@@ -1,12 +1,14 @@
 <?php
+
 /**
  * @file plugins/generic/latexConverter/LatexConverterPlugin.php
  *
- * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yücel
+ * Copyright (c) 2021-2025 TIB Hannover
+ * Copyright (c) 2021-2025 Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class LatexConverterPlugin
+ *
  * @ingroup plugins_generic_latexconverter
  *
  * @brief Plugin LatexConverter
@@ -14,17 +16,17 @@
 
 namespace APP\plugins\generic\latexConverter;
 
+use APP\core\Application;
 use APP\plugins\generic\latexConverter\classes\Constants;
+use APP\plugins\generic\latexConverter\classes\PluginApiHandler;
 use APP\plugins\generic\latexConverter\classes\Settings\Actions;
 use APP\plugins\generic\latexConverter\classes\Settings\Manage;
 use APP\plugins\generic\latexConverter\classes\Settings\MimeTypes;
-use APP\plugins\generic\latexConverter\classes\Workflow\Links;
+use APP\template\TemplateManager;
 use PKP\config\Config;
 use PKP\core\JSONMessage;
 use PKP\plugins\GenericPlugin;
 use PKP\plugins\Hook;
-
-define('LATEX_CONVERTER_PLUGIN_NAME', basename(__FILE__, '.php'));
 
 class LatexConverterPlugin extends GenericPlugin
 {
@@ -33,37 +35,28 @@ class LatexConverterPlugin extends GenericPlugin
     {
         if (parent::register($category, $path, $mainContextId)) {
             if ($this->getEnabled()) {
-                $links = new Links($this);
+                $request = Application::get()->getRequest();
+                $templateMgr = TemplateManager::getManager($request);
+
+                $apiHandler = new PluginApiHandler($this);
+                Hook::add('APIHandler::endpoints::submissions', [$apiHandler, 'addRoute']);
+
                 $mimeTypes = new MimeTypes($this);
-                Hook::add('LoadHandler', [$this, 'registerHandler']);
-                Hook::add('TemplateManager::fetch', [$links, 'execute']);
                 Hook::add('SubmissionFile::supportsDependentFiles', [$mimeTypes, 'execute']);
 
-                $this->_registerTemplateResource();
-            }
+                $templateMgr->addJavaScript(
+                    'LatexConverterJs',
+                    "{$request->getBaseUrl()}/{$this->getPluginPath()}/public/build/build.iife.js",
+                    ['inline' => false, 'contexts' => ['backend'], 'priority' => TemplateManager::STYLE_SEQUENCE_LAST]
+                );
 
+                $templateMgr->addStyleSheet('backendUiExampleStyle',
+                    "{$request->getBaseUrl()}/{$this->getPluginPath()}/public/build/build.css",
+                    ['contexts' => ['backend']]
+                );
+            }
             return true;
         }
-
-        return false;
-    }
-
-    /** Register PluginHandler */
-    public function registerHandler(string $hookName, array $args): bool
-    {
-        $page = $args[0];
-        $op = $args[1];
-
-        switch ("$page/$op") {
-            case "latexConverter/extractShow":
-            case "latexConverter/extractExecute":
-            case "latexConverter/convert":
-                define('HANDLER_CLASS', '\APP\plugins\generic\latexConverter\classes\Handler\PluginHandler');
-                return true;
-            default:
-                break;
-        }
-
         return false;
     }
 

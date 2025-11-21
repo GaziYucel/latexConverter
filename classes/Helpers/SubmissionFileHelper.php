@@ -1,12 +1,14 @@
 <?php
+
 /**
  * @file plugins/generic/latexConverter/classes/Models/SubmissionFileHelper.php
  *
- * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yücel
+ * @copyright (c) 2021-2025 TIB Hannover
+ * @copyright (c) 2021-2025 Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class SubmissionFileHelper
+ *
  * @ingroup plugins_generic_latexconverter
  *
  * @brief SubmissionFileHelper methods
@@ -16,98 +18,71 @@ namespace APP\plugins\generic\latexConverter\classes\Helpers;
 
 use APP\core\Services;
 use APP\facades\Repo;
-use APP\notification\NotificationManager;
 use APP\plugins\generic\latexConverter\classes\Constants;
 use Exception;
 use PKP\core\PKPApplication;
-use PKP\core\PKPRequest;
-use PKP\notification\PKPNotification;
 use PKP\submissionFile\SubmissionFile;
 
 class SubmissionFileHelper
 {
-    /**
-     * @var NotificationManager
-     */
-    protected NotificationManager $notificationManager;
-
-    /**
-     * @var PKPRequest
-     */
-    protected PKPRequest $request;
-
-    /**
-     * @var int
-     */
     protected int $submissionId;
-
-    /**
-     * @var SubmissionFile
-     */
     protected SubmissionFile $originalSubmissionFile;
 
     /**
-     * This is the newly inserted main file object
-     *
-     * @var int
+     * This is the newly inserted main file object.
      */
     protected int $newSubmissionFileId;
 
     /**
-     * This array is a list of SubmissionFile objects
-     *
-     * @var array [ SubmissionFile, ... ]
+     * This array is a list of SubmissionFile objects.
+     * e.g. [ SubmissionFile, ... ]
      */
     protected array $newDependentSubmissionFiles = [];
 
     /**
-     * Absolute path to the directory with the extracted content of archive
+     * Absolute path to the directory with the extracted content of archive.
      * e.g. c:/ojs_files/journals/1/articles/51/648b243110d7e_zip_extracted
-     *
-     * @var string
      */
-    protected string $workingDirAbsolutePath;
+    protected string $workingDirPath;
 
     /**
-     * Path to directory for files of this submission, e.g. journals/1/articles/51
-     *
-     * @var string
+     * Path to directory for files of this submission.
+     * e.g. journals/1/articles/51
      */
     protected string $submissionFilesRelativeDir;
 
     /**
-     * The name of the main tex file, e.g. main.tex
-     *
-     * @var string
+     * The name of the main tex file.
+     * e.g. main.tex
      */
     protected string $mainFileName = '';
 
     /**
-     * The names of the dependent files, e.g. [ 'image1.png', ... ]
-     *
-     * @var string[]
+     * The names of the dependent files.
+     * e.g. [ 'image1.png', ... ]
      */
     protected array $dependentFileNames = [];
 
-    public function __construct($request, $submissionId, $originalSubmissionFile, $workingDirAbsolutePath,
-                                $submissionFilesRelativeDir, $mainFileName, $dependentFiles)
+    public function __construct(
+        SubmissionFile $originalSubmissionFile,
+        string         $mainFileName,
+        array          $dependentFiles,
+        string         $workingDirPath)
     {
-        $this->notificationManager = new NotificationManager();
-
-        $this->request = $request;
-        $this->submissionId = $submissionId;
         $this->originalSubmissionFile = $originalSubmissionFile;
         $this->mainFileName = $mainFileName;
         $this->dependentFileNames = $dependentFiles;
+        $this->workingDirPath = $workingDirPath;
 
-        $this->submissionFilesRelativeDir = $submissionFilesRelativeDir;
-        $this->workingDirAbsolutePath = $workingDirAbsolutePath;
+        $this->submissionId = (int)$originalSubmissionFile->getData('submissionId');
+        $this->submissionFilesRelativeDir = Repo::submissionFile()->getSubmissionDir(
+            Repo::submission()->get($this->submissionId)->getData('contextId'),
+            $this->submissionId
+        );
     }
 
     /**
-     * Add the main file
-     *
-     * @return bool
+     * Add the main file.
      */
     public function addMainFile(): bool
     {
@@ -115,12 +90,12 @@ class SubmissionFileHelper
         $newFileNameReal = uniqid() . '.' . $newFileExtension;
         $newFileNameDisplay = [];
         foreach ($this->originalSubmissionFile->getData('name') as $localeKey => $name) {
-            $newFileNameDisplay[$localeKey] = pathinfo($name)['filename'] . '.' . $newFileExtension;
+            $newFileNameDisplay[$localeKey] = $name ? pathinfo($name)['filename'] . '.' . $newFileExtension : null;
         }
 
         // add file to file system
         $newFileId = Services::get('file')->add(
-            $this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $this->mainFileName,
+            $this->workingDirPath . DIRECTORY_SEPARATOR . $this->mainFileName,
             $this->submissionFilesRelativeDir . DIRECTORY_SEPARATOR . $newFileNameReal);
 
         // add file link to database
@@ -136,52 +111,39 @@ class SubmissionFileHelper
             'submissionId' => $this->submissionId
         ];
         $newFileObject = Repo::submissionFile()->newDataObject($newFileParams);
-        $this->newSubmissionFileId = Repo::submissionFile()->add($newFileObject);
-
-        if (empty($this->newSubmissionFileId)) {
-            $this->notificationManager->createTrivialNotification(
-                $this->request->getUser()->getId(),
-                PKPNotification::NOTIFICATION_TYPE_ERROR,
-                array('contents' => __('plugins.generic.latexConverter.notification.defaultErrorOccurred'))
-            );
+        try {
+            $this->newSubmissionFileId = Repo::submissionFile()->add($newFileObject);
+            return true;
+        } catch (Exception) {
             return false;
         }
-
-        return true;
     }
 
     /**
-     * Add dependent files
-     *
-     * @return bool
+     * Add dependent files.
      */
     public function addDependentFiles(): bool
     {
+        $success = true;
+
         foreach ($this->dependentFileNames as $fileName) {
             $newFileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
             $newFileNameReal = uniqid() . '.' . $newFileExtension;
-
             $newFileNameDisplay = [];
             foreach ($this->originalSubmissionFile->getData('name') as $localeKey => $name) {
-                $newFileNameDisplay[$localeKey] = $fileName;
+                $newFileNameDisplay[$localeKey] = $name ? $fileName : null;
             }
 
             // add file to file system
             $newFileId = Services::get('file')->add(
-                $this->workingDirAbsolutePath . DIRECTORY_SEPARATOR . $fileName,
+                $this->workingDirPath . DIRECTORY_SEPARATOR . $fileName,
                 $this->submissionFilesRelativeDir . DIRECTORY_SEPARATOR . $newFileNameReal);
 
             // determine genre (see table genres and genre_settings)
             $newFileGenreId = 12; // OTHER
-            if (in_array(
-                pathinfo($fileName, PATHINFO_EXTENSION),
-                Constants::EXTENSIONS['image'])
-            ) {
+            if (in_array(pathinfo($fileName, PATHINFO_EXTENSION), Constants::EXTENSIONS['image'])) {
                 $newFileGenreId = 10; // IMAGE
-            } elseif (in_array(
-                pathinfo($fileName, PATHINFO_EXTENSION),
-                Constants::EXTENSIONS['style'])
-            ) {
+            } elseif (in_array(pathinfo($fileName, PATHINFO_EXTENSION), Constants::EXTENSIONS['style'])) {
                 $newFileGenreId = 11; // STYLE
             }
 
@@ -196,10 +158,14 @@ class SubmissionFileHelper
                 'name' => $newFileNameDisplay
             ];
             $newFileObject = Repo::submissionFile()->newDataObject($newFileParams);
-            $this->newDependentSubmissionFiles[] = Repo::submissionFile()->add($newFileObject);
+
+            try {
+                $this->newDependentSubmissionFiles[] = Repo::submissionFile()->add($newFileObject);
+            } catch (Exception) {
+                $success = false;
+            }
         }
 
-        return true;
+        return $success;
     }
 }
-

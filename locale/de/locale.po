@@ -7,8 +7,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2023-05-01T12:00:00+00:00\n"
-"PO-Revision-Date: 2023-05-01T12:00:00+00:00\n"
+"POT-Creation-Date: 2025-11-01T12:00:00+00:00\n"
+"PO-Revision-Date: 2025-11-01T12:00:00+00:00\n"
 "Language: \n"
 
 msgid "plugins.generic.latexConverter.displayName"
@@ -29,6 +29,9 @@ msgstr "Extract Archive"
 
 msgid "plugins.generic.latexConverter.button.convert"
 msgstr "Convert LaTex to Pdf"
+
+msgid "plugins.generic.latexConverter.button.message"
+msgstr "Do you want to convert the file \"{$fileName}\" file to Pdf?"
 
 msgid "plugins.generic.latexConverter.notification.defaultErrorOccurred"
 msgstr "Errors occurred while processing request. Please try again or contact your administrator."
@@ -51,12 +54,14 @@ msgstr "Configured latex converter is unavailable"
 msgid "plugins.generic.latexConverter.executable.notConfigured"
 msgstr "Latex converter is not configured"
 
+msgid "plugins.generic.latexConverter.modal.extract.header"
+msgstr "Extract \"{$archiveName}\""
+
 msgid "plugins.generic.latexConverter.modal.extract.title"
-msgstr "Below are listed the files of the archive file.<br/> Please select the file which will be the main document."
+msgstr "These are the files in the archive. Please select the file which will be the main document."
 
 msgid "plugins.generic.latexConverter.modal.extract.label"
 msgstr "Please select a file"
 
 msgid "plugins.generic.latexConverter.modal.extract.button"
 msgstr "Extract and save"
-
