@@ -1,0 +1,9 @@
+[
+  "common.cancel",
+  "plugins.generic.latexConverter.button.convert",
+  "plugins.generic.latexConverter.button.extract",
+  "plugins.generic.latexConverter.button.message",
+  "plugins.generic.latexConverter.modal.extract.button",
+  "plugins.generic.latexConverter.modal.extract.header",
+  "plugins.generic.latexConverter.modal.extract.title"
+]
