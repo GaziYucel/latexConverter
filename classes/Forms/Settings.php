@@ -1,18 +1,20 @@
 <?php
+
 /**
- * @file plugins/generic/latexConverter/classes/SettingsForm.php
+ * @file plugins/generic/latexConverter/classes/Forms/Settings.php
  *
- * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yücel
+ * Copyright (c) 2021-2025 TIB Hannover
+ * Copyright (c) 2021-2025 Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * @class SettingsForm
+ * @class Settings
+ *
  * @ingroup plugins_generic_latexconverter
  *
- * @brief Form for journal managers to configure the latexConverter plugin
+ * @brief Form for journal managers to configure the plugin
  */
 
-namespace APP\plugins\generic\latexConverter\classes\Settings;
+namespace APP\plugins\generic\latexConverter\classes\Forms;
 
 use APP\core\Application;
 use APP\notification\Notification;
@@ -25,49 +27,33 @@ use PKP\form\Form;
 use PKP\form\validation\FormValidatorCSRF;
 use PKP\form\validation\FormValidatorPost;
 
-class SettingsForm extends Form
+class Settings extends Form
 {
-    /**
-     * @var LatexConverterPlugin
-     */
     public LatexConverterPlugin $plugin;
 
-    /**
-     * Array of variables saved in the database
-     *
-     * @var string[]
-     */
     private array $settings = [
         Constants::SETTING_AUTHORISED_MIME_TYPES,
         Constants::SETTING_LATEX_PATH_EXECUTABLE
     ];
 
-    /**
-     * @copydoc Form::__construct()
-     */
-    public function __construct(LatexConverterPlugin &$plugin)
+    public function __construct(LatexConverterPlugin $plugin)
     {
         parent::__construct($plugin->getTemplateResource('settings.tpl'));
 
-        $this->plugin = &$plugin;
+        $this->plugin = $plugin;
 
         $this->addCheck(new FormValidatorPost($this));
         $this->addCheck(new FormValidatorCSRF($this));
     }
 
-    /**
-     * Load settings already saved in the database Settings are stored by context,
-     * so that each journal or press can have different settings.
-     *
-     * @copydoc Form::initData()
-     */
+    /** @copydoc Form::initData() */
     public function initData(): void
     {
         $context = Application::get()->getRequest()->getContext();
 
         $contextId = $context
             ? $context->getId()
-            : PKPApplication::CONTEXT_SITE;
+            : PKPApplication::SITE_CONTEXT_ID;
 
         foreach ($this->settings as $key) {
             $this->setData($key,
@@ -78,11 +64,7 @@ class SettingsForm extends Form
         parent::initData();
     }
 
-    /**
-     * Load data that was submitted with the form
-     *
-     * @copydoc Form::readInputData()
-     */
+    /** @copydoc Form::readInputData() */
     public function readInputData(): void
     {
         foreach ($this->settings as $key) {
@@ -92,17 +74,7 @@ class SettingsForm extends Form
         parent::readInputData();
     }
 
-    /**
-     * Fetch any additional data needed for your form.
-     *
-     * Data assigned to the form using $this->setData() during the
-     * initData() or readInputData() methods will be passed to the
-     * template.
-     *
-     * In the example below, the plugin name is passed to the
-     * template so that it can be used in the URL that the form is
-     * submitted to.
-     */
+    /** @copydoc Form::fetch() */
     public function fetch($request, $template = null, $display = false): ?string
     {
         $templateMgr = TemplateManager::getManager($request);
@@ -111,19 +83,14 @@ class SettingsForm extends Form
         return parent::fetch($request, $template, $display);
     }
 
-    /**
-     * Save the settings
-     *
-     * @copydoc Form::execute()
-     * @return null|mixed
-     */
+    /** @copydoc Form::execute() */
     public function execute(...$functionArgs): mixed
     {
         $context = Application::get()->getRequest()->getContext();
 
         $contextId = $context
             ? $context->getId()
-            : Application::CONTEXT_SITE;
+            : Application::SITE_CONTEXT_ID;
 
         foreach ($this->settings as $key) {
             $this->plugin->updateSetting(
