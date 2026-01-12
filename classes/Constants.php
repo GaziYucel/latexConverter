@@ -1,12 +1,16 @@
 <?php
+
 /**
- * @file classes/Constants.php
+ * @file plugins/generic/latexConverter/classes/Constants.php
  *
- * @copyright (c) 2021+ TIB Hannover
- * @copyright (c) 2021+ Gazi Yücel
+ * Copyright (c) 2021-2025 TIB Hannover
+ * Copyright (c) 2021-2025 Gazi Yücel
  * @license Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
  * @class Constants
+ *
+ * @ingroup plugins_generic_latexconverter
+ *
  * @brief Constants
  */
 
@@ -42,5 +46,10 @@ class Constants
 
     public const TEX_MAIN_FILENAME = 'main.' . self::TEX_EXTENSION;
 
-    public const AUTHORISED_ROLES = [Role::ROLE_ID_MANAGER, Role::ROLE_ID_SUB_EDITOR, Role::ROLE_ID_ASSISTANT];
+    public const AUTHORISED_ROLES = [
+        Role::ROLE_ID_SITE_ADMIN,
+        Role::ROLE_ID_MANAGER,
+        Role::ROLE_ID_SUB_EDITOR,
+        Role::ROLE_ID_ASSISTANT
+    ];
 }

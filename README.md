@@ -18,7 +18,6 @@ The plugin for OJS 3.3, 3.4 and 3.5 that allows to convert articles in Latex to 
     - [Classmap](#classmap)
 
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
 # Features
 
@@ -59,7 +58,7 @@ Clicking this button will do the following:
 
 ### Requirements
 
-- PHP 8.1+
+- PHP 8.3+
 - A LaTex converter for your platform, e.g. [TexLive](https://tug.org/texlive)
 
 ### Install with Git
@@ -69,9 +68,10 @@ Get the correct version for you OJS version:
 - branch main: development version, don't use for production
 - branch stable-3_3_0: use this version for OJS version 3.3.0.x
 - branch stable-3_4_0: use this version for OJS version 3.4.0.x
+- branch stable-3_5_0: use this version for OJS version 3.5.0.x
 
 ```shell
-git clone -b stable-3_4_0 https://github.com/GaziYucel/latexConverter
+git clone https://github.com/GaziYucel/latexConverter -b stable-3_5_0
 ```
 
 ### Install via direct download
@@ -127,23 +127,21 @@ cd /path-to-some-latex-project
 ### Structure
 
     .
-    ├── assets                            # Images, styles, scripts
-    ├── classes
-    │   ├── Handler                       # Handlers
-    │   ├── Helpers                       # Helper classes
-    │   ├── Settings                      # Settings classes
-    │   └── Workflow                      # Classes for the workflow
+    ├── .project                          # Repository related, e.g. screenshots
+    ├── classes                           # Classes
+    ├── lib                               # External libraries
     ├── locale                            # Language files
+    ├── public                            # Generated files, e.g. public.js
+    ├── registry                          # Generated files, e.g. locale
+    ├── resources                         # VueJs files
     ├── templates                         # Templates folder
-    │   ├── extract.tpl                   # Template for the extract modal
-    │   └── settings.tpl                  # Settings template
-    ├── vendor                            # Composer autoload and dependencies (ojs 3.3.0)
     ├── .gitignore                        # Git ignore file
-    ├── composer.json                     # Composer file, e.g. dependencies, classmap (ojs 3.3.0)
-    ├── index.php                         # Main entry point of plugin (ojs 3.3.0)
     ├── LatexConverterPlugin.php          # Main class of plugin
+    ├── LICENSE                           # License
+    ├── package.json                      # Package file
     ├── README.md                         # This file
-    └── version.xml                       # Current version of the plugin
+    ├── version.xml                       # Current version of the plugin
+    └── vite.config.js                    # Vite configuration file
 
 ### Notes
 
@@ -165,7 +163,7 @@ configure this you specify all directories or files to search for classes.
 Example:
 
 ```
-{ 
+{
   "autoload": {
     "classmap": ["src/", "lib/", "Something.php"]
   }

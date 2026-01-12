@@ -1,24 +1,32 @@
 {**
- * templates/settings.tpl
+ * @file plugins/generic/latexConverter/templates/settings.tpl
  *
- * Copyright (c) 2023+ TIB Hannover
- * Copyright (c) 2023+ Gazi Yücel
+ * Copyright (c) 2021-2025 TIB Hannover
+ * Copyright (c) 2021-2025 Gazi Yücel
  * Distributed under the GNU GPL v3. For full terms see the file docs/COPYING.
  *
- * Settings form for the latexConverterSettings plugin.
+ * @ingroup plugins_generic_latexconverter
+ *
+ * @brief Settings form for the latexConverterSettings plugin.
  *}
 <script>
     $(function () {
-        $('#{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}Settings').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
+        $('#LatexConverterPluginSettings').pkpHandler('$.pkp.controllers.form.AjaxFormHandler');
     });
 </script>
 
-<form class="pkp_form" method="POST" id="{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}Settings"
-      action="{url router=$smarty.const.ROUTE_COMPONENT op="manage" category="generic" plugin=$pluginName verb="settings" save=true}">
+<form class="pkp_form" method="POST"
+      id="LatexConverterPluginSettings"
+      action="{url router=$smarty.const.ROUTE_COMPONENT
+      op="manage"
+      category="generic"
+      plugin=$pluginName
+      verb="settings"
+      save=true}">
 
     {csrf}
 
-    {fbvFormArea id="{$smarty.const.LATEX_CONVERTER_PLUGIN_NAME}SettingsArea"}
+    {fbvFormArea id="LatexConverterPluginSettingsArea"}
 
     {fbvFormSection}
         <p>
